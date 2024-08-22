@@ -178,7 +178,10 @@ def manage():
     selected_dates = request.form.getlist('dates')
     
     if action == 'edit':
+        changes_made = False
+
         for date in selected_dates:
+            original = schedule_dict.get(date, {})
             participants = request.form.get(f'participants_{date}').split(',')
             start_time = request.form.get(f'start_time_{date}')
             end_time = request.form.get(f'end_time_{date}')
@@ -187,7 +190,7 @@ def manage():
             # 現在の日時を取得して記録
             now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             
-            schedule_dict[date] = {
+            updated = {
                 "participants": [p.strip() for p in participants],
                 "start_time": start_time,
                 "end_time": end_time,
@@ -195,17 +198,29 @@ def manage():
                 "last_updated": now
             }
 
-        # スケジュールを保存
-        save_schedule(schedule_dict)
+            if original != updated:
+                schedule_dict[date] = updated
+                changes_made = True
 
-        # 編集された練習情報を通知
-        message = f"練習スケジュールが更新されました。\n日付: {date}\n時間: {start_time} - {end_time}\n場所: {location}\n参加者: {'・'.join(schedule_dict[date]['participants'])}さん"
-        send_line_notify(message)
+        if changes_made:
+            # スケジュールを保存
+            save_schedule(schedule_dict)
+
+            # 編集された練習情報を通知
+            message = f"練習スケジュールが更新されました。\n日付: {date}\n時間: {start_time} - {end_time}\n場所: {location}\n参加者: {'・'.join(schedule_dict[date]['participants'])}さん"
+            send_line_notify(message)
         
-        flash("保存が完了しました。")
+            flash("保存が完了しました。")
+        else:
+            flash("変更がありません。")
+
         return redirect(url_for('index'))
 
     elif action == 'delete':
+        if not selected_dates:
+            flash("削除する日付を選択してください。")
+            return redirect(url_for('index'))
+
         for date in selected_dates:
             if date in schedule_dict:
                 del schedule_dict[date]
