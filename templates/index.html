@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="jp">
+<head>
+    <meta charset="UTF-8">
+    <title>練習スケジュール管理</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function enableEditing() {
+            const checkboxes = document.querySelectorAll('input[name="dates"]:checked');
+            checkboxes.forEach((checkbox) => {
+                const date = checkbox.value;
+                document.getElementById('participants_' + date).readOnly = false;
+                document.getElementById('start_time_' + date).disabled = false;
+                document.getElementById('end_time_' + date).disabled = false;
+                document.getElementById('location_' + date).disabled = false;
+            });
+        }
+
+        function confirmAction(actionType) {
+            if (actionType === 'delete') {
+                return confirm("本当に削除しますか？");
+            } else if (actionType === 'edit') {
+                return confirm("変更を保存しますか？");
+            } else if (actionType === 'add') {
+                return confirm("新しいスケジュールを追加しますか？");
+            }
+            return false;
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div class="flash-message">
+                {{ messages[0] }}
+            </div>
+            {% endif %}
+        {% endwith %}
+        <h1>練習スケジュール</h1>
+        <form action="{{ url_for('manage') }}" method="post">
+            <ul class="schedule-list">
+                {% for date, details in schedule.items() %}
+                <li>
+                    <input type="checkbox" name="dates" value="{{ date }}">
+                    <strong>{{ date }} ({{ date | next_weekday }})</strong>
+                    <div class="schedule-detail">
+                        <div class="schedule-item">
+                            <label>参加者:</label>
+                            <input type="text" id="participants_{{ date }}" name="participants_{{ date }}" value="{{ details.participants | join(', ') }}" readonly required>
+                        </div>
+                        <div class="schedule-item">
+                            <label>時間:</label>
+                            <input type="time" id="start_time_{{ date }}" name="start_time_{{ date }}" value="{{ details.start_time }}" disabled>
+                            から
+                            <input type="time" id="end_time_{{ date }}" name="end_time_{{ date }}" value="{{ details.end_time }}" disabled>
+                            まで
+                        </div>
+                        <div class="schedule-item">
+                            <label>場所:</label>
+                            <select id="location_{{ date }}" name="location_{{ date }}" disabled>
+                                <option value="市立大学" {% if details.location == "市立大学" %}selected{% endif %}>市立大学</option>
+                                <option value="安佐南区スポーツセンター" {% if details.location == "安佐南区スポーツセンター" %}selected{% endif %}>安佐南区スポーツセンター</option>
+                                <option value="県立総合体育館" {% if details.location == "県立総合体育館" %}selected{% endif %}>県立総合体育館</option>
+                            </select>
+                        </div>
+                        {% if details.last_updated %}
+                        <div class="last-updated">
+                            最後に更新された日時: {{ details.last_updated }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            <div class="action-buttons">
+                <button type="button" onclick="enableEditing()" class="edit-btn">編集</button>
+                <button type="submit" name="action" value="edit" class="submit-btn" onclick="return confirmAction('edit')">保存</button>
+                <button type="submit" name="action" value="delete" class="delete-btn" onclick="return confirmAction('delete')">削除</button>
+            </div>
+        </form>
+        
+        <h2>新しいスケジュールを追加</h2>
+        <form action="{{ url_for('add') }}" method="post" class="add-form" onsubmit="return confirmAction('add')">
+            <div class="schedule-item">
+                <label for="date">日付:</label>
+                <input type="text" id="date" name="date" placeholder="例: 8/17" required>
+            </div>
+            <div class="schedule-item">
+                <label for="participants">参加者:</label>
+                <input type="text" id="participants" name="participants" placeholder="例: 山田, 田中, 鈴木" required>
+            </div>
+            <div class="schedule-item">
+                <label for="start_time">開始時間:</label>
+                <input type="time" id="start_time" name="start_time" required>
+                から
+                <label for="end_time">終了時間:</label>
+                <input type="time" id="end_time" name="end_time" required>
+                まで
+            </div>
+            <div class="schedule-item">
+                <label for="location">場所:</label>
+                <select id="location" name="location" required>
+                    <option value="市立大学">市立大学</option>
+                    <option value="安佐南区スポーツセンター">安佐南区スポーツセンター</option>
+                    <option value="県立総合体育館">県立総合体育館</option>
+                </select>
+            </div>
+            <div class="action-buttons">
+                <button type="submit" class="add-btn">追加</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

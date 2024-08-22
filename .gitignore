@@ -1,0 +1,18 @@
+# Pythonキャッシュファイルとディレクトリ
+__pycache__/
+*.pyc
+*.pyo
+
+# Python仮想環境関連
+Include/
+Lib/
+Scripts/
+pyvenv.cfg
+
+# 環境変数ファイル
+.env
+
+# その他の不要なファイル
+*.log
+*.sqlite3
+*.db
