@@ -42,32 +42,61 @@ h1, h2 {
     margin: 10px 0;
     padding: 10px;
     border-radius: 4px;
-    display: block;
-}
-
-.schedule-detail {
-    margin-top: 10px;
 }
 
 .schedule-item {
-    margin-bottom: 10px;
     display: flex;
+    flex-wrap: nowrap; /* 横並びで表示 */
     align-items: center;
-    flex-wrap: wrap;
+    margin-bottom: 10px;
 }
 
 .schedule-item label {
-    margin-right: 10px;
     font-weight: bold;
+    margin-right: 10px;
 }
 
-input[type="text"], input[type="time"], select {
+.schedule-item .time, .schedule-item .location {
+    margin-right: 20px;
+    white-space: nowrap; /* 時間や場所が改行されないようにする */
+    flex-shrink: 0; /* この部分が縮小されないようにする */
+}
+
+.schedule-item .participants {
+    display: flex;
+    flex-wrap: nowrap; /* 名前を横に並べる */
+    flex-grow: 1; /* 名前部分が可能な限り幅を取るようにする */
+    min-width: 50%; /* 名前部分の最小幅を設定 */
+    max-width: 400%;
+}
+
+.participants span {
+    margin-right: 10px; /* 各名前の間にスペースを設定 */
+    white-space: nowrap; /* 名前が改行されないようにする */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0; /* 名前部分が縮小されないようにする */
+}
+
+input[type="text"], select {
     padding: 5px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    margin-right: 10px;
+    min-width: 300px; /* 入力フィールドの最小幅を設定 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
+input[type="time"] {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    min-width: 50px; /* 入力フィールドの最小幅を設定 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 input[readonly], input:disabled, select:disabled {
     background-color: #f0f0f0;
     border: none;
@@ -119,6 +148,7 @@ input[readonly], input:disabled, select:disabled {
     font-size: 16px;
     width: 48%; /* フォームで使用されるボタンの幅を調整 */
 }
+
 .add-btn {
     background-color: #FFA500; /* オレンジ色 */
     color: white;
@@ -132,6 +162,7 @@ input[readonly], input:disabled, select:disabled {
     cursor: pointer;
     border-radius: 4px;
 }
+
 .submit-btn:hover {
     background-color: #007bb5;
 }
@@ -144,6 +175,6 @@ input[readonly], input:disabled, select:disabled {
     background-color: #45a049;
 }
 
-.add-btn.hover {
+.add-btn:hover {
     background-color: #FF8C00;
 }
