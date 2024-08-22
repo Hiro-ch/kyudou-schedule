@@ -179,6 +179,7 @@ def manage():
     
     if action == 'edit':
         changes_made = False
+        updated_dates = []
 
         for date in selected_dates:
             original = schedule_dict.get(date, {})
@@ -200,17 +201,19 @@ def manage():
 
             if original != updated:
                 schedule_dict[date] = updated
+                updated_dates.append(date)
                 changes_made = True
 
         if changes_made:
             # スケジュールを保存
             save_schedule(schedule_dict)
 
-            # 編集された練習情報を通知
-            message = f"練習スケジュールが更新されました。\n日付: {date}\n時間: {start_time} - {end_time}\n場所: {location}\n参加者: {'・'.join(schedule_dict[date]['participants'])}さん"
-            send_line_notify(message)
+            # 各編集された練習情報を通知
+            for date in updated_dates:
+                message = f"練習スケジュールが更新されました。\n日付: {date}\n時間: {schedule_dict[date]['start_time']} - {schedule_dict[date]['end_time']}\n場所: {schedule_dict[date]['location']}\n参加者: {'・'.join(schedule_dict[date]['participants'])}さん"
+                send_line_notify(message)
         
-            flash("保存が完了しました。")
+            flash(f"{len(updated_dates)} 件の変更が保存されました。")
         else:
             flash("変更がありません。")
 
@@ -221,20 +224,27 @@ def manage():
             flash("削除する日付を選択してください。")
             return redirect(url_for('index'))
 
+        deleted_dates = []
+
         for date in selected_dates:
             if date in schedule_dict:
                 del schedule_dict[date]
+                deleted_dates.append(date)
 
-        # スケジュールを保存
-        save_schedule(schedule_dict)
+        if deleted_dates:
+            # スケジュールを保存
+            save_schedule(schedule_dict)
 
-        # 削除された情報を通知
-        message = f"練習スケジュールが削除されました。\n日付: {date}"
-        send_line_notify(message)
+            # 削除された情報を通知
+            message = f"練習スケジュールが削除されました。\n日付: {', '.join(deleted_dates)}"
+            send_line_notify(message)
         
-        flash("削除が完了しました。")
-        return redirect(url_for('index'))
+            flash("削除が完了しました。")
+        else:
+            flash("選択された日付はスケジュールに存在しませんでした。")
 
+        return redirect(url_for('index'))
+        
 # スケジュールジョブを実行するためのスレッドを作成
 def run_scheduler():
     schedule.every().day.at("20:00").do(notify_tomorrow_schedule)
