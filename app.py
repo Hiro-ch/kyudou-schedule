@@ -239,7 +239,8 @@ def manage():
             message = f"練習スケジュールが削除されました。\n日付: {', '.join(deleted_dates)}"
             send_line_notify(message)
         
-            flash("削除が完了しました。")
+            # 削除された件数をflashメッセージで表示
+            flash(f"{len(deleted_dates)} 件のスケジュールが削除されました。")
         else:
             flash("選択された日付はスケジュールに存在しませんでした。")
 
