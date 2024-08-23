@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="jp">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <title>練習スケジュール管理</title>
@@ -59,6 +59,14 @@
     </script>
 </head>
 <body>
+    <div class="user-status {% if user.is_admin %}admin-status{% else %}user-status-blue{% endif %}">
+        {% if user.is_admin %}
+            管理者としてログインしています。
+        {% else %}
+            一般ユーザーとしてログインしています。
+        {% endif %}
+    </div>
+
     <div class="container">
         {% with messages = get_flashed_messages() %}
             {% if messages %}
@@ -67,6 +75,7 @@
             </div>
             {% endif %}
         {% endwith %}
+
         <h1>練習スケジュール</h1>
         <form action="{{ url_for('manage') }}" method="post">
             <ul class="schedule-list">
