@@ -5,7 +5,7 @@
     <title>練習スケジュール管理</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script>
-        function enableEditing() {
+        function enableEditing(date) {
             const checkboxes = document.querySelectorAll('input[name="dates"]:checked');
             checkboxes.forEach((checkbox) => {
                 const date = checkbox.value;
@@ -14,6 +14,12 @@
                 document.getElementById('end_time_' + date).disabled = false;
                 document.getElementById('location_' + date).disabled = false;
             });
+            const selectElement = document.getElementById('location_' + date);
+            const customInputElement = document.getElementById('custom_location_' + date);
+            selectElement.disabled = false;
+            if (selectElement.value === 'その他') {
+                customInputElement.disabled = false;
+            }
         }
 
         function confirmAction(actionType) {
@@ -25,6 +31,30 @@
                 return confirm("新しいスケジュールを追加しますか？");
             }
             return false;
+        }
+
+        function toggleCustomLocationInput(date) {
+            const selectElement = document.getElementById('location_' + date);
+            const customInputElement = document.getElementById('custom_location_' + date);
+            if (selectElement.value === 'その他') {
+                customInputElement.style.display = 'inline';
+                customInputElement.disabled = false;
+            } else {
+                customInputElement.style.display = 'none';
+                customInputElement.disabled = true;
+            }
+        }
+        
+        function toggleCustomLocationInputNew() {
+            const selectElement = document.getElementById('location');
+            const customInputElement = document.getElementById('custom_location');
+            if (selectElement.value === 'その他') {
+                customInputElement.style.display = 'inline';
+                customInputElement.disabled = false;
+            } else {
+                customInputElement.style.display = 'none';
+                customInputElement.disabled = true;
+            }
         }
     </script>
 </head>
@@ -57,12 +87,14 @@
                             まで
                         </div>
                         <div class="schedule-item">
-                            <label>場所:</label>
-                            <select id="location_{{ date }}" name="location_{{ date }}" disabled>
+                            <label for="location_{{ date }}">場所:</label>
+                            <select id="location_{{ date }}" name="location_{{ date }}" onchange="toggleCustomLocationInput('{{ date }}')" disabled>
                                 <option value="広島市立大学" {% if details.location == "広島市立大学" %}selected{% endif %}>広島市立大学</option>
                                 <option value="安佐南区スポーツセンター" {% if details.location == "安佐南区スポーツセンター" %}selected{% endif %}>安佐南区スポーツセンター</option>
                                 <option value="県立総合体育館" {% if details.location == "県立総合体育館" %}selected{% endif %}>県立総合体育館</option>
+                                <option value="その他" {% if details.location not in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}selected{% endif %}>その他</option>
                             </select>
+                            <input type="text" id="custom_location_{{ date }}" name="custom_location_{{ date }}" value="{{ details.location if details.location not in ['広島市立大学', '安佐南区スポーツセンター', '県立総合体育館'] else '' }}" {% if details.location in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}style="display:none;"{% endif %} placeholder="場所を入力" disabled>
                         </div>
                         {% if details.last_updated %}
                         <div class="last-updated">
@@ -98,13 +130,15 @@
                 <input type="time" id="end_time" name="end_time" required>
                 まで
             </div>
-            <div class="schedule-item">
+            <div class="form-group">
                 <label for="location">場所:</label>
-                <select id="location" name="location" required>
+                <select id="location" name="location" onchange="toggleCustomLocationInputNew()">
                     <option value="広島市立大学">広島市立大学</option>
                     <option value="安佐南区スポーツセンター">安佐南区スポーツセンター</option>
                     <option value="県立総合体育館">県立総合体育館</option>
+                    <option value="その他">その他</option>
                 </select>
+                <input type="text" id="custom_location" name="custom_location" placeholder="場所を入力" style="display:none;" disabled>
             </div>
             <div class="action-buttons">
                 <button type="submit" class="add-btn">追加</button>
