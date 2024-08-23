@@ -10,6 +10,7 @@ import locale
 import schedule
 import time
 import threading
+import platform
 
 # .envファイルから環境変数をロード
 load_dotenv()
@@ -42,6 +43,7 @@ def next_weekday(date_str):
     next_day = date + datetime.timedelta(days=1)
     # 一日後の曜日を取得
     return next_day.strftime('%A')
+
 
 # ダミーユーザークラス
 class User(UserMixin):
@@ -144,7 +146,15 @@ def index():
 @app.route('/add', methods=['POST'])
 @login_required
 def add():
-    date = request.form['date']
+    # YYYY-MM-DD 形式の日付を取得
+    date = request.form['date']  # 例: '2024-09-24'
+    
+    # OSによってフォーマットを変更
+    if platform.system() == 'Windows':
+        date = datetime.datetime.strptime(date, '%Y-%m-%d').strftime('%#m/%#d')  # Windows用
+    else:
+        date = datetime.datetime.strptime(date, '%Y-%m-%d').strftime('%-m/%-d')  # macOS/Linux用
+
     participants = request.form['participants'].split(',')
     start_time = request.form['start_time']
     end_time = request.form['end_time']

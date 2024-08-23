@@ -116,7 +116,7 @@
         <form action="{{ url_for('add') }}" method="post" class="add-form" onsubmit="return confirmAction('add')">
             <div class="schedule-item">
                 <label for="date">日付:</label>
-                <input type="text" id="date" name="date" placeholder="例: 8/17" required>
+                <input type="date" id="date" name="date" required>
             </div>
             <div class="schedule-item">
                 <label for="participants">参加者:</label>
