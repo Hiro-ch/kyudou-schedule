@@ -126,15 +126,15 @@ def notify_tomorrow_schedule():
         participants = ', '.join(details['participants'])
         
         message = (
-            f"明日 ({tomorrow_str}) の練習予定です。\n"
-            f"日時: {tomorrow_str} {start_time}～{end_time}\n"
+            f"\n明日 ({tomorrow_str}) の練習予定です。\n"
+            f"時間: {start_time}～{end_time}\n"
             f"場所: {location}\n"
-            f"参加者: {participants}\n"
+            f"参加者: {participants}さん\n"
             "明日も頑張りましょう！"
         )
         send_line_notify(message)
     else:
-        send_line_notify(f"明日 ({tomorrow_str}) は練習の予定はありません。")
+        send_line_notify(f"\n明日 ({tomorrow_str}) は練習の予定はありません。")
 
 # 一般ユーザー用ログインページのルート
 @app.route('/user_login', methods=['POST'])
