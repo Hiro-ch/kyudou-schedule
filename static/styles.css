@@ -82,10 +82,12 @@ input[type="text"], select {
     padding: 5px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    min-width: 300px; /* 入力フィールドの最小幅を設定 */
+    min-width: 300px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    margin-top: 5px;
+    display: inline-block;
 }
 
 input[type="time"] {
