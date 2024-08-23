@@ -13,12 +13,16 @@
             align-items: center;
             height: 100vh;
             margin: 0;
+            flex-direction: column;
         }
         .login-container {
             background-color: white;
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 400px;
         }
         h1 {
             margin-bottom: 20px;
@@ -30,7 +34,7 @@
             margin-bottom: 5px;
             font-weight: bold;
         }
-        input[type="password"] {
+        input[type="text"], input[type="password"] {
             width: 100%;
             padding: 8px;
             margin-bottom: 20px;
@@ -60,21 +64,39 @@
 </head>
 <body>
     <div class="login-container">
-        <h1>ログイン</h1>
-        <form method="POST">
-            <label for="password">パスワード:</label>
-            <input type="password" name="password" id="password" required>
+        <h1>一般ユーザー用ログイン</h1>
+        <form action="{{ url_for('user_login') }}" method="post">
+            <div>
+                <label for="user_password">パスワード:</label>
+                <input type="password" id="user_password" name="user_password" required>
+            </div>
             <button type="submit">ログイン</button>
         </form>
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <div class="error-message">
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
     </div>
+
+    <div class="login-container">
+        <h1>管理者用ログイン</h1>
+        <form action="{{ url_for('admin_login') }}" method="post">
+            <div>
+                <label for="username">ユーザー名:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div>
+                <label for="password">パスワード:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">ログイン</button>
+        </form>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="error-message">
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 </body>
 </html>

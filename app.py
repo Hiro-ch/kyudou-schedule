@@ -11,6 +11,7 @@ import schedule
 import time
 import threading
 import platform
+from datetime import timedelta
 
 # .envファイルから環境変数をロード
 load_dotenv()
@@ -23,8 +24,15 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'  # ログインページを指定
 
-# 共通のパスワードを環境変数から取得
-COMMON_PASSWORD = os.getenv('COMMON_PASSWORD', 'defaultpassword')
+# セッションが永続化されないように設定
+app.config['SESSION_PERMANENT'] = False
+
+# 一般ユーザーのパスワードを環境変数から取得
+USER_PASSWORD = os.getenv('USER_PASSWORD')
+
+# 管理者情報を環境変数から取得
+ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
 
 # 日本語ロケールを設定
 locale.setlocale(locale.LC_ALL, '')
@@ -47,14 +55,23 @@ def next_weekday(date_str):
 
 # ダミーユーザークラス
 class User(UserMixin):
-    id = 1  # シンプルに1つのユーザーIDを使用
+    def __init__(self, id, is_admin=False):
+        self.id = id
+        self.is_admin = is_admin
 
 # ユーザーのロード方法
 @login_manager.user_loader
 def load_user(user_id):
     if user_id == "1":
-        return User()
+        return User(id=1, is_admin=True)  # 管理者ユーザー
+    elif user_id == "2":
+        return User(id=2, is_admin=False)  # 一般ユーザー
     return None
+
+# 共通のログインページのルート
+@app.route('/login')
+def login():
+    return render_template('login.html')
 
 # スケジュールをJSONファイルから読み込む
 def load_schedule():
@@ -114,21 +131,34 @@ def notify_tomorrow_schedule():
     else:
         send_line_notify(f"明日 ({tomorrow_str}) は練習の予定はありません。")
 
-# ログインページのルート
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        password = request.form['password']
+# 一般ユーザー用ログインページのルート
+@app.route('/user_login', methods=['POST'])
+def user_login():
+    password = request.form['user_password']
 
-        # パスワードのチェック
-        if password == COMMON_PASSWORD:
-            user = User()
-            login_user(user)
-            return redirect(url_for('index'))
-        else:
-            flash('ログインに失敗しました。パスワードが間違っています。')
+    # 一般ユーザーのパスワードをチェック
+    if password == USER_PASSWORD:
+        user = User(id=2, is_admin=False)
+        login_user(user, remember=False)
+        return redirect(url_for('index'))
+    else:
+        flash('ログインに失敗しました。パスワードが間違っています。')
+        return redirect(url_for('login'))
 
-    return render_template('login.html')
+# 管理者用ログインページのルート
+@app.route('/admin_login', methods=['POST'])
+def admin_login():
+    username = request.form['username']
+    password = request.form['password']
+
+    # 管理者のユーザー名とパスワードをチェック
+    if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+        user = User(id=1, is_admin=True)
+        login_user(user, remember=False)
+        return redirect(url_for('index'))
+    else:
+        flash('ログインに失敗しました。ユーザー名またはパスワードが間違っています。')
+        return redirect(url_for('login'))
 
 # ログアウトのルート
 @app.route('/logout')
@@ -146,6 +176,10 @@ def index():
 @app.route('/add', methods=['POST'])
 @login_required
 def add():
+    if not current_user.is_admin:
+        flash("管理者のみがスケジュールを追加できます。")
+        return redirect(url_for('index'))
+
     # YYYY-MM-DD 形式の日付を取得
     date = request.form['date']  # 例: '2024-09-24'
     
@@ -189,6 +223,10 @@ def add():
 @app.route('/manage', methods=['POST'])
 @login_required
 def manage():
+    if not current_user.is_admin:
+        flash("管理者のみが編集できます。")
+        return redirect(url_for('index'))
+
     action = request.form.get('action')
     selected_dates = request.form.getlist('dates')
     
