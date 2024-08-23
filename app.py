@@ -309,13 +309,27 @@ def manage():
         return redirect(url_for('index'))
 
         
-# スケジュールジョブを実行するためのスレッドを作成
 def run_scheduler():
     schedule.clear()
-    schedule.every().day.at("20:00:00").do(notify_tomorrow_schedule)
+
+    # シンガポール時間のオフセットを日本時間に合わせる
+    jst = pytz.timezone('Asia/Tokyo')
+    now = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
+    jst_time = now.astimezone(jst)
+
+    # JSTの20:00に対応するシンガポール時間を計算
+    target_time = jst_time.replace(hour=20, minute=0, second=0, microsecond=0)
+    if target_time < now:
+        target_time += datetime.timedelta(days=1)
+
+    # シンガポール時間に合わせてスケジュールを設定
+    schedule_time = target_time.strftime('%H:%M:%S')
+    schedule.every().day.at(schedule_time).do(notify_tomorrow_schedule)
+
     while True:
         schedule.run_pending()
-        time.sleep(1)
+        time.sleep(60)  # 毎分の実行をチェック
+
 
 if __name__ == '__main__':
     # スケジュールジョブをバックグラウンドで実行
