@@ -22,6 +22,10 @@
             }
         }
 
+        function cancelEditing() {
+            location.reload();  // ページをリロードして編集をキャンセル
+        }
+
         function confirmAction(actionType) {
             if (actionType === 'delete') {
                 return confirm("本当に削除しますか？");
@@ -57,6 +61,10 @@
                 customInputElement.style.display = 'none';
                 customInputElement.disabled = true;
             }
+        }
+        
+        function cancelAdding() {
+            document.getElementById('add-form').reset();  // 追加フォームを初期化
         }
     </script>
 </head>
@@ -120,6 +128,7 @@
                 {% endfor %}
             </ul>
             <div class="action-buttons">
+                <button type="button" onclick="cancelEditing()" class="cancel-btn">チェックを外す</button>
                 <button type="button" onclick="enableEditing()" class="edit-btn">編集</button>
                 <button type="submit" name="action" value="edit" class="submit-btn" onclick="return confirmAction('edit')">保存</button>
                 <button type="submit" name="action" value="delete" class="delete-btn" onclick="return confirmAction('delete')">削除</button>
@@ -156,6 +165,7 @@
             </div>
             <div class="action-buttons">
                 <button type="submit" class="add-btn">追加</button>
+                <button type="button" class="cancel-btn" onclick="cancelAdding()">キャンセル</button>
             </div>
         </form>
     </div>

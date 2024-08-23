@@ -166,7 +166,40 @@ input[readonly], input:disabled, select:disabled {
     margin: 4px 2px;
     cursor: pointer;
     border-radius: 4px;
+    height: 44px;
 }
+
+.cancel-btn {
+    padding-left: 15px;  /* キャンセルボタンの左側の余白を調整 */
+    padding-right: 15px; /* キャンセルボタンの右側の余白を調整 */
+    width: auto; /* 自動調整された幅にする */
+}
+
+.submit-btn, .delete-btn, .edit-btn, .cancel-btn {
+    width: 48%; /* フォームで使用されるボタンの幅を調整 */
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.add-form .action-buttons {
+    justify-content: flex-start; /* ボタンを左揃えにする */
+}
+
+.add-form .cancel-btn {
+    height: 44px;  /* キャンセルボタンの高さを調整 */
+    line-height: 38px; /* テキストの垂直方向の中央揃えを確保する */
+    padding: 0 15px;  /* 内側の余白を調整 */
+    margin-top: 4px; /* ボタンの垂直方向の位置を微調整 */
+}
+
+.add-form .add-btn, .add-form .cancel-btn {
+    width: auto; /* ボタンの幅を自動調整 */
+    margin-right: 10px; /* ボタン間のスペースを調整 */
+}
+
 .submit-btn:hover {
     background-color: #007bb5;
 }
@@ -196,3 +229,4 @@ input[readonly], input:disabled, select:disabled {
 .logout-btn:hover {
     background-color: #e64a19;
 }
+
