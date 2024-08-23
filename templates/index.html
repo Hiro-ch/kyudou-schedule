@@ -29,6 +29,8 @@
                 return confirm("変更を保存しますか？");
             } else if (actionType === 'add') {
                 return confirm("新しいスケジュールを追加しますか？");
+            } else if (actionType === 'logout') {
+                return confirm("ログアウトしますか？");
             }
             return false;
         }
@@ -65,6 +67,9 @@
         {% else %}
             一般ユーザーとしてログインしています。
         {% endif %}
+        <form action="{{ url_for('logout') }}" method="post" style="display:inline;">
+            <button type="submit" class="logout-btn" onclick="return confirmAction('logout')">ログアウト</button>
+        </form>
     </div>
 
     <div class="container">
