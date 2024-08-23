@@ -16,6 +16,22 @@ body {
     border-radius: 8px;
 }
 
+.logo img {
+    width: 100%; /* ロゴ画像をコンテナの幅に合わせる */
+    max-width: 100%; /* 横幅を画面全体に */
+    height: auto; /* 画像の高さを自動調整 */
+    max-height: 50vh; /* 画像の最大高さをビューの高さに合わせる */
+    object-fit: contain; /* 画像全体が収まるように調整 */
+    margin-bottom: 20px; /* 画像の下にマージンを追加 */
+}
+
+@media only screen and (max-width: 600px) {
+    .logo img {
+        max-width: 100%;
+        max-height: 50vh; /* スマートフォンの場合、高さを少し小さく設定 */
+    }
+}
+
 .flash-message {
     background-color: #dff0d8;
     color: #3c763d;
@@ -178,18 +194,4 @@ input[readonly], input:disabled, select:disabled {
 
 .logout-btn:hover {
     background-color: #e64a19;
-}
-
-.logo img {
-    width: 100%; /* ロゴ画像をコンテナの幅に合わせる */
-    max-width: 300px; /* 最大幅を設定 */
-    height: auto; /* 画像の高さを自動調整 */
-    margin-bottom: 20px; /* 画像の下にマージンを追加 */
-    object-fit: contain; /* 画像のアスペクト比を維持して全体を表示 */
-}
-
-@media only screen and (max-width: 600px) {
-    .logo img {
-        max-width: 50%; /* 小さい画面では幅を縮小 */
-    }
 }
