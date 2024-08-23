@@ -149,6 +149,11 @@ def add():
     start_time = request.form['start_time']
     end_time = request.form['end_time']
     location = request.form['location']
+    custom_location = request.form.get('custom_location')
+
+    # 「その他」が選択され、自由入力フィールドが記入されている場合、その内容を保存
+    if location == "その他" and custom_location:
+        location = custom_location
 
     # 現在の日時を取得して記録
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -186,7 +191,11 @@ def manage():
             participants = request.form.get(f'participants_{date}').split(',')
             start_time = request.form.get(f'start_time_{date}')
             end_time = request.form.get(f'end_time_{date}')
-            location = request.form.get(f'location_{date}')
+            location = request.form.get(f'location_' + date)
+            custom_location = request.form.get(f'custom_location_' + date)
+
+            if location == "その他" and custom_location:
+                location = custom_location
 
             # 現在の日時を取得して記録
             now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -245,6 +254,7 @@ def manage():
             flash("選択された日付はスケジュールに存在しませんでした。")
 
         return redirect(url_for('index'))
+
         
 # スケジュールジョブを実行するためのスレッドを作成
 def run_scheduler():
