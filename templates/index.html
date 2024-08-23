@@ -136,7 +136,7 @@
         </form>
         
         <h2>新しいスケジュールを追加</h2>
-        <form action="{{ url_for('add') }}" method="post" class="add-form" onsubmit="return confirmAction('add')">
+        <form id="add-form" action="{{ url_for('add') }}" method="post" class="add-form" onsubmit="return confirmAction('add')">
             <div class="schedule-item">
                 <label for="date">日付:</label>
                 <input type="date" id="date" name="date" required>
@@ -165,7 +165,7 @@
             </div>
             <div class="action-buttons">
                 <button type="submit" class="add-btn">追加</button>
-                <button type="button" class="cancel-btn" onclick="cancelAdding()">キャンセル</button>
+                <button type="button" class="cancel-btn" onclick="cancelAdding()">リセット</button>
             </div>
         </form>
     </div>
