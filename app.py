@@ -110,7 +110,12 @@ def notify_tomorrow_schedule():
     
     # 翌日の日付を取得
     tomorrow = now + datetime.timedelta(days=1)
-    tomorrow_str = tomorrow.strftime("%-m/%-d")
+    
+    # OSによってフォーマットを変更
+    if platform.system() == 'Windows':
+        tomorrow_str = tomorrow.strftime('%#m/%#d')  # Windows用
+    else:
+        tomorrow_str = tomorrow.strftime('%-m/%-d')  # macOS/Linux用
     
     # 翌日の練習スケジュールを取得
     if tomorrow_str in schedule_dict:
@@ -306,7 +311,8 @@ def manage():
         
 # スケジュールジョブを実行するためのスレッドを作成
 def run_scheduler():
-    schedule.every().day.at("20:00").do(notify_tomorrow_schedule)
+    schedule.clear()
+    schedule.every().day.at("20:00:00").do(notify_tomorrow_schedule)
     while True:
         schedule.run_pending()
         time.sleep(1)
