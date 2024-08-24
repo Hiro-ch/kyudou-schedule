@@ -19,6 +19,12 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your_default_secret_key')
 
+@app.route('/static/<path:filename>')
+def custom_static(filename):
+    # send_from_directoryを使用して静的ファイルを配信
+    # cache_timeoutを秒単位で指定（ここでは1時間=3600秒）
+    return send_from_directory('static', filename, cache_timeout=3600)
+
 # Flask-Loginの設定
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -318,7 +324,7 @@ def run_scheduler():
     jst_time = now.astimezone(jst)
 
     # JSTの20:00に対応するシンガポール時間を計算
-    target_time = jst_time.replace(hour=20, minute=0, second=0, microsecond=0)
+    target_time = jst_time.replace(hour=16, minute=33, second=0, microsecond=0)
     if target_time < now:
         target_time += datetime.timedelta(days=1)
 
