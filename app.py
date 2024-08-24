@@ -108,12 +108,11 @@ def send_line_notify(message):
         print("LINE通知を送信しました。")
     else:
         print(f"通知の送信に失敗しました: {response.status_code}")
-        
-# FlaskアプリでJSONデータを返すエンドポイントを作成
-@app.route('/get_schedule', methods=['GET'])
+
+# APIエンドポイント: スケジュールを取得する
+@app.route('/api/schedule', methods=['GET'])
 def get_schedule():
-    with open('schedule.json', 'r', encoding='utf-8') as f:
-        schedule = json.load(f)
+    schedule = load_schedule()
     return jsonify(schedule)
 
 # 一般ユーザー用ログインページのルート
