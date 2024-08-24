@@ -108,39 +108,13 @@ def send_line_notify(message):
         print("LINE通知を送信しました。")
     else:
         print(f"通知の送信に失敗しました: {response.status_code}")
-
-def notify_tomorrow_schedule():
-    # 日本時間を設定
-    jst = pytz.timezone('Asia/Tokyo')
-    now = datetime.datetime.now(jst)
-    
-    # 翌日の日付を取得
-    tomorrow = now + datetime.timedelta(days=1)
-    
-    # OSによってフォーマットを変更
-    if platform.system() == 'Windows':
-        tomorrow_str = tomorrow.strftime('%#m/%#d')  # Windows用
-    else:
-        tomorrow_str = tomorrow.strftime('%-m/%-d')  # macOS/Linux用
-    
-    # 翌日の練習スケジュールを取得
-    if tomorrow_str in schedule_dict:
-        details = schedule_dict[tomorrow_str]
-        start_time = details['start_time']
-        end_time = details['end_time']
-        location = details['location']
-        participants = ', '.join(details['participants'])
         
-        message = (
-            f"\n明日 ({tomorrow_str}) の練習予定です。\n"
-            f"時間: {start_time}～{end_time}\n"
-            f"場所: {location}\n"
-            f"参加者: {participants}さん\n"
-            "明日も頑張りましょう！"
-        )
-        send_line_notify(message)
-    else:
-        send_line_notify(f"\n明日 ({tomorrow_str}) は練習の予定はありません。")
+# FlaskアプリでJSONデータを返すエンドポイントを作成
+@app.route('/get_schedule', methods=['GET'])
+def get_schedule():
+    with open('schedule.json', 'r', encoding='utf-8') as f:
+        schedule = json.load(f)
+    return jsonify(schedule)
 
 # 一般ユーザー用ログインページのルート
 @app.route('/user_login', methods=['POST'])
@@ -314,32 +288,5 @@ def manage():
 
         return redirect(url_for('index'))
 
-        
-def run_scheduler():
-    schedule.clear()
-
-    # シンガポール時間のオフセットを日本時間に合わせる
-    jst = pytz.timezone('Asia/Tokyo')
-    now = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
-    jst_time = now.astimezone(jst)
-
-    # JSTの20:00に対応するシンガポール時間を計算
-    target_time = jst_time.replace(hour=20, minute=0, second=0, microsecond=0)
-    if target_time < now:
-        target_time += datetime.timedelta(days=1)
-
-    # シンガポール時間に合わせてスケジュールを設定
-    schedule_time = target_time.strftime('%H:%M:%S')
-    schedule.every().day.at(schedule_time).do(notify_tomorrow_schedule)
-
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
-
-
 if __name__ == '__main__':
-    # スケジュールジョブをバックグラウンドで実行
-    scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
-    scheduler_thread.start()
-
     app.run(debug=True)
