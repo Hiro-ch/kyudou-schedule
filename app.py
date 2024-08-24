@@ -324,7 +324,7 @@ def run_scheduler():
     jst_time = now.astimezone(jst)
 
     # JSTの20:00に対応するシンガポール時間を計算
-    target_time = jst_time.replace(hour=16, minute=33, second=0, microsecond=0)
+    target_time = jst_time.replace(hour=20, minute=0, second=0, microsecond=0)
     if target_time < now:
         target_time += datetime.timedelta(days=1)
 
@@ -334,7 +334,7 @@ def run_scheduler():
 
     while True:
         schedule.run_pending()
-        time.sleep(60)  # 毎分の実行をチェック
+        time.sleep(1)
 
 
 if __name__ == '__main__':
