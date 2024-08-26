@@ -1,83 +1,112 @@
 {
-    "8/24": {
-        "participants": ["笠井", "平井", "山﨑", "宮本", "真鍋", "坂口"],
-        "start_time": "10:00",
-        "end_time": "12:00",
-        "location": "広島市立大学",
-        "last_updated": null
-    },
-    "8/26": {
-        "participants": ["笠井", "山﨑", "宮本", "坂口"],
-        "start_time": "10:00",
-        "end_time": "12:00",
-        "location": "広島市立大学",
-        "last_updated": null
-    },
+    
     "8/27": {
-        "participants": ["笠井", "山﨑", "真鍋", "坂口"],
+        "participants": [
+            "笠井",
+            "山﨑",
+            "真鍋"
+        ],
         "start_time": "10:00",
         "end_time": "12:00",
         "location": "広島市立大学",
         "last_updated": null
     },
     "8/29": {
-        "participants": ["笠井", "山﨑", "宮本", "真鍋"],
+        "participants": [
+            "笠井",
+            "山﨑",
+            "宮本",
+            "真鍋"
+        ],
         "start_time": "10:00",
         "end_time": "12:00",
         "location": "広島市立大学",
         "last_updated": null
     },
     "8/31": {
-        "participants": ["笠井", "山﨑", "真鍋"],
+        "participants": [
+            "笠井",
+            "山﨑",
+            "真鍋"
+        ],
         "start_time": "10:00",
         "end_time": "12:00",
         "location": "広島市立大学",
         "last_updated": null
     },
     "9/2": {
-        "participants": ["笠井", "山﨑", "宮本"],
+        "participants": [
+            "笠井",
+            "山﨑",
+            "宮本"
+        ],
         "start_time": "10:00",
         "end_time": "12:00",
         "location": "広島市立大学",
         "last_updated": null
     },
     "9/3": {
-        "participants": ["笠井", "真鍋"],
+        "participants": [
+            "笠井",
+            "真鍋"
+        ],
         "start_time": "10:00",
         "end_time": "12:00",
         "location": "広島市立大学",
         "last_updated": null
     },
     "9/5": {
-        "participants": ["笠井", "宮本", "真鍋"],
+        "participants": [
+            "笠井",
+            "宮本",
+            "真鍋"
+        ],
         "start_time": "10:00",
         "end_time": "12:00",
         "location": "広島市立大学",
         "last_updated": null
     },
     "9/7": {
-        "participants": ["笠井", "宮本", "真鍋"],
+        "participants": [
+            "笠井",
+            "宮本",
+            "真鍋"
+        ],
         "start_time": "10:00",
         "end_time": "12:00",
         "location": "広島市立大学",
         "last_updated": null
     },
     "9/9": {
-        "participants": ["笠井", "山﨑", "宮本"],
+        "participants": [
+            "笠井",
+            "山﨑",
+            "宮本"
+        ],
         "start_time": "10:00",
         "end_time": "12:00",
         "location": "広島市立大学",
         "last_updated": null
     },
     "9/10": {
-        "participants": ["前田", "笠井", "山﨑", "真鍋"],
+        "participants": [
+            "前田",
+            "笠井",
+            "山﨑",
+            "真鍋"
+        ],
         "start_time": "10:00",
         "end_time": "12:00",
         "location": "広島市立大学",
         "last_updated": null
     },
     "9/12": {
-        "participants": ["前田", "笠井", "平井", "山﨑", "真鍋"],
+        "participants": [
+            "前田",
+            "笠井",
+            "山﨑",
+            "真鍋"
+        ],
         "start_time": "10:00",
         "end_time": "12:00",
         "location": "広島市立大学",
