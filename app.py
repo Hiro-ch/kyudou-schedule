@@ -181,6 +181,11 @@ def add():
     else:
         date = datetime.datetime.strptime(date, '%Y-%m-%d').strftime('%-m/%-d')  # macOS/Linux用
 
+     # 既存のスケジュールをチェック
+    if date in schedule_dict:
+        flash(f"追加しようとしている日はすでに練習が予定されています: {date}")
+        return redirect(url_for('index'))
+
     participants = request.form['participants'].split(',')
     start_time = request.form['start_time']
     end_time = request.form['end_time']
