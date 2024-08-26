@@ -115,6 +115,14 @@ def get_schedule():
     schedule = load_schedule()
     return jsonify(schedule)
 
+# スケジュールをJSONファイルから再読み込みするAPIエンドポイント
+@app.route('/api/update_schedule', methods=['POST'])
+def update_schedule():
+    global schedule_dict
+    schedule_dict = load_schedule()
+    print("スケジュールが更新されました。")
+    return jsonify({"message": "スケジュールが更新されました。"}), 200
+
 # 一般ユーザー用ログインページのルート
 @app.route('/user_login', methods=['POST'])
 def user_login():
