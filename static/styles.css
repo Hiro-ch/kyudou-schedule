@@ -142,6 +142,7 @@ input[readonly], input:disabled, select:disabled {
     font-size: 16px;
     width: 48%; /* フォームで使用されるボタンの幅を調整 */
 }
+
 .add-btn {
     background-color: #FFA500; /* オレンジ色 */
     color: white;
@@ -218,3 +219,36 @@ input[readonly], input:disabled, select:disabled {
     background-color: #e64a19;
 }
 
+/* スマホ用スタイルの追加 */
+@media screen and (max-width: 767px) { /* 767px以下の画面幅に適用（スマホサイズ） */
+
+    .container {
+        width: 100%; /* コンテナの幅を100%に設定して、画面全体を使用 */
+        max-width: 100%; /* 最大幅も100%に設定 */
+        margin: 0; /* 上下の余白はそのまま、左右の余白をなくす */
+        padding: 0 10px; /* 左右のパディングを少しにして余白を減らす */
+    }
+
+    .schedule-list li {
+        width: 100%; /* リストアイテムの幅を100%に設定 */
+        padding: 8px; /* パディングを最小限に */
+        display: flex; /* フレックスボックスを使用して要素を並べる */
+        flex-direction: column; /* 縦方向に要素を配置 */
+        box-sizing: border-box; /* パディングとボーダーを含めて幅を計算 */
+    }
+
+    .schedule-item {
+        width: 100%; /* 各項目の幅を100%に設定 */
+        flex: 1; /* 各項目が均等にスペースを使用 */
+        margin-bottom: 4px; /* 下のマージンはそのまま */
+        box-sizing: border-box; /* パディングとボーダーを含めて幅を計算 */
+    }
+
+    .schedule-item label,
+    .schedule-item input,
+    .schedule-item select {
+        width: 100%; /* 幅を100%に設定して、全体を使う */
+        flex: 1; /* 各要素が均等にスペースを使用 */
+        box-sizing: border-box; /* パディングとボーダーを含めて幅を計算 */
+    }
+}
