@@ -82,7 +82,14 @@ def login():
 # スケジュールをJSONファイルから読み込む
 def load_schedule():
     with open('schedule.json', 'r', encoding='utf-8') as f:
-        return json.load(f)
+        schedule = json.load(f)
+    # OSに依存しない日付のフォーマット処理
+    def parse_date(date_str):
+        # 日付の文字列をdatetimeオブジェクトに変換
+        return datetime.datetime.strptime(date_str, '%m/%d')
+    # スケジュールを昇順にソート
+    sorted_schedule = dict(sorted(schedule.items(), key=lambda item: parse_date(item[0])))
+    return sorted_schedule
 
 # スケジュールをJSONファイルに保存する
 def save_schedule(schedule_dict):
@@ -163,27 +170,17 @@ def logout():
 @app.route('/')
 @login_required
 def index():
-    # OSに応じた日付の処理
-    def parse_date(date_str):
-        if platform.system() == 'Windows':
-            # Windows用に日付の数字を変換
-            date_str = date_str.lstrip('0').replace('/0', '/')
-        return datetime.datetime.strptime(date_str, '%m/%d')
-
     # 日本時間のタイムゾーンを設定
     jst = pytz.timezone('Asia/Tokyo')
 
-    # スケジュールを降順にソートし、日本時間に変換
-    sorted_schedule = {}
-    for date, details in sorted(schedule_dict.items(), key=lambda item: parse_date(item[0]), reverse=False):
-        # last_updatedを日本時間に変換（存在する場合のみ）
+    # last_updatedを日本時間に変換（存在する場合のみ）
+    for date, details in schedule_dict.items():
         if 'last_updated' in details and details['last_updated'] is not None:
             utc_time = datetime.datetime.strptime(details['last_updated'], '%Y-%m-%d %H:%M:%S')
             jst_time = utc_time.astimezone(jst)
             details['last_updated'] = jst_time.strftime('%Y-%m-%d %H:%M:%S')
-        sorted_schedule[date] = details
 
-    return render_template('index.html', schedule=sorted_schedule, user=current_user)
+    return render_template('index.html', schedule=schedule_dict, user=current_user)
 
 @app.route('/add', methods=['POST'])
 @login_required
@@ -227,6 +224,15 @@ def add():
         "last_updated": now
     }
 
+     # 追加後にスケジュールを昇順にソート
+    def parse_date(date_str):
+        return datetime.datetime.strptime(date_str, '%m/%d')
+
+    sorted_schedule = dict(sorted(schedule_dict.items(), key=lambda item: parse_date(item[0])))
+
+    # ソートされたスケジュールを保存
+    schedule_dict.clear()
+    schedule_dict.update(sorted_schedule)
     # スケジュールを保存
     save_schedule(schedule_dict)
 
