@@ -163,7 +163,26 @@ def logout():
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html', schedule=schedule_dict, user=current_user)
+    # OSごとに異なる日付フォーマットを設定
+    if platform.system() == 'Windows':
+        date_format = '%#m/%#d'  # Windows用フォーマット
+    else:
+        date_format = '%-m/%-d'  # macOS/Linux用フォーマット
+
+    # 日本時間のタイムゾーンを設定
+    jst = pytz.timezone('Asia/Tokyo')
+    
+    # スケジュールを降順にソートし、日本時間に変換
+    sorted_schedule = {}
+    for date, details in sorted(schedule_dict.items(), key=lambda item: datetime.datetime.strptime(item[0], date_format), reverse=True):
+        # last_updatedを日本時間に変換
+        if 'last_updated' in details:
+            utc_time = datetime.datetime.strptime(details['last_updated'], '%Y-%m-%d %H:%M:%S')
+            jst_time = utc_time.astimezone(jst)
+            details['last_updated'] = jst_time.strftime('%Y-%m-%d %H:%M:%S')
+        sorted_schedule[date] = details
+
+    return render_template('index.html', schedule=sorted_schedule, user=current_user)
 
 @app.route('/add', methods=['POST'])
 @login_required
