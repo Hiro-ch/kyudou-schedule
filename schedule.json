@@ -111,5 +111,54 @@
         "end_time": "12:00",
         "location": "広島市立大学",
         "last_updated": null
+    },
+    "9/14": {
+        "participants": [
+            "全体練習"
+        ],
+        "start_time": "10:00",
+        "end_time": "12:00",
+        "location": "広島市立大学",
+        "last_updated": null
+    },
+    "9/18": {
+        "participants": [
+            "山崎康",
+            "佐々木",
+            "宮本",
+            "笠井",
+            "堀田",
+            "真鍋",
+            "山﨑大"
+        ],
+        "start_time": "10:00",
+        "end_time": "12:00",
+        "location": "広島市立大学",
+        "last_updated": null
+    },
+    "9/19": {
+        "participants": [
+            "山崎康",
+            "佐々木",
+            "笠井",
+            "堀田",
+            "平井",
+            "真鍋",
+            "山﨑大",
+            "坂口"
+        ],
+        "start_time": "10:00",
+        "end_time": "12:00",
+        "location": "広島市立大学",
+        "last_updated": null
+    },
+    "9/21": {
+        "participants": [
+            "全体練習"
+        ],
+        "start_time": "10:00",
+        "end_time": "12:00",
+        "location": "広島市立大学",
+        "last_updated": null
     }
 }
