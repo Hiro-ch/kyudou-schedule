@@ -262,7 +262,11 @@ def manage():
 
         for date in selected_dates:
             original = schedule_dict.get(date, {})
-            participants = request.form.get(f'participants_{date}').split(',')
+            
+            # 参加者名の入力を取得し、半角スペースをカンマに置き換える
+            participants_input = request.form.get(f'participants_{date}').replace(' ', ',')
+            participants = participants_input.split(',')
+            
             start_time = request.form.get(f'start_time_{date}')
             end_time = request.form.get(f'end_time_{date}')
             location = request.form.get(f'location_' + date)
