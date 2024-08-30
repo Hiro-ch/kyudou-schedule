@@ -267,9 +267,4 @@ input[readonly], input:disabled, select:disabled {
         display: block; /* 「から」や「まで」を改行して表示 */
         margin-bottom: 10px; /* 「から」や「まで」の下に余白を追加 */
     }
-
-    /* 開始時間と終了時間の入力フィールドを左揃えに設定 */
-    .schedule-item input[type="time"] {
-        text-align: left; /* 入力内容を左揃えに設定 */
-    }
 }
