@@ -1,10 +1,10 @@
-<!DOCTYPE html>
-<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ログイン</title>
     <link rel="icon" href="static/images/favicon.ico">
+    <!-- Font AwesomeのCSSを追加 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -23,7 +23,7 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
             width: 100%;
-            max-width: 400px; /* PC表示時の最大幅 */
+            max-width: 400px;
         }
         h1 {
             margin-bottom: 20px;
@@ -38,7 +38,7 @@
         input[type="text"], input[type="password"] {
             width: 100%;
             padding: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box;
@@ -52,6 +52,7 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
+            margin-top: 10px;
         }
         button:hover {
             background-color: #4cae4c;
@@ -62,31 +63,36 @@
             margin-bottom: 20px;
         }
         .logo img {
-            width: 100%; /* ロゴ画像をコンテナの幅に合わせる */
-            max-width: 300px; /* 最大幅を設定 */
-            height: auto; /* 画像の高さを自動調整 */
-            margin-bottom: 20px; /* 画像の下にマージンを追加 */
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            margin-bottom: 20px;
         }
-
-        /* モバイルデバイス対応 */
-        @media (max-width: 500px) {
-            .login-container {
-                padding: 15px;
-                max-width: 90%; /* モバイル表示時の幅を90%に設定 */
-                margin-bottom: 15px;
-            }
-
-            h1 {
-                font-size: 20px; /* モバイル表示時のフォントサイズを小さく */
-                margin-bottom: 15px;
-            }
-
-            button {
-                padding: 8px; /* モバイル表示時のボタンのパディングを小さく */
-                font-size: 14px;
-            }
+        .toggle-password {
+            cursor: pointer;
+            font-size: 14px;
+            position: relative;
+            margin-top: -30px;
+            margin-right: 10px;
+            float: right;
+            color: #007bff;
         }
     </style>
+    <script>
+        function togglePasswordVisibility(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(inputId + '-toggle');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="logo">
@@ -95,9 +101,11 @@
     <div class="login-container">
         <h1>一般ユーザー用ログイン</h1>
         <form action="{{ url_for('user_login') }}" method="post">
-            <div>
+            <div style="position: relative;">
                 <label for="user_password">パスワード:</label>
                 <input type="password" id="user_password" name="user_password" required>
+                <!-- 目のアイコンを追加 -->
+                <i class="fas fa-eye toggle-password" id="user_password-toggle" onclick="togglePasswordVisibility('user_password')"></i>
             </div>
             <button type="submit">ログイン</button>
         </form>
@@ -110,9 +118,11 @@
                 <label for="username">ユーザー名:</label>
                 <input type="text" id="username" name="username" required>
             </div>
-            <div>
-                <label for="password">パスワード:</label>
-                <input type="password" id="password" name="password" required>
+            <div style="position: relative;">
+                <label for="admin_password">パスワード:</label>
+                <input type="password" id="admin_password" name="password" required>
+                <!-- 目のアイコンを追加 -->
+                <i class="fas fa-eye toggle-password" id="admin_password-toggle" onclick="togglePasswordVisibility('admin_password')"></i>
             </div>
             <button type="submit">ログイン</button>
         </form>
