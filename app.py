@@ -240,7 +240,7 @@ def add():
     save_schedule(schedule_dict)
 
     # 新しいスケジュールの追加を通知
-    message = f"新しい練習スケジュールが追加されました。\n日付: {date}\n時間: {start_time} - {end_time}\n場所: {location}\n参加者: {'・'.join(schedule_dict[date]['participants'])}さん"
+    message = f"新しい練習スケジュールが追加されました。\n日付: {date}\n時間: {start_time} ～ {end_time}\n場所: {location}\n参加者: {'・'.join(schedule_dict[date]['participants'])}さん"
     send_line_notify(message)
 
     flash("新しいスケジュールが追加されました。")
