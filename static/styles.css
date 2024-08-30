@@ -79,6 +79,12 @@ h1, h2 {
     font-weight: bold;
 }
 
+/* 「場所」のラベルに対するスタイルを追加 */
+.form-group label[for="location"] {
+    font-weight: bold; /* 「場所」の文字を太字にする */
+    font-size: 16px; /* 必要に応じてフォントサイズを調整 */
+    margin-bottom: 5px; /* ラベルと入力欄の間に余白を追加 */
+}
 input[type="text"], input[type="time"], select {
     padding: 5px;
     border: 1px solid #ccc;
