@@ -48,15 +48,16 @@ locale.setlocale(locale.LC_ALL, '')
 def todate(date_str):
     return datetime.datetime.strptime(date_str, '%m/%d')
 
-# 日付をdatetimeオブジェクトに変換し、その日付の曜日を取得するフィルタ
+# 日付をdatetimeオブジェクトに変換し、その日付の曜日を日本語で取得するフィルタ
 @app.template_filter('next_weekday')
 def next_weekday(date_str):
     # 日付をdatetimeオブジェクトに変換
     date = datetime.datetime.strptime(date_str, '%m/%d')
     # 一日後の日付を取得
     next_day = date + datetime.timedelta(days=1)
-    # 一日後の曜日を取得
-    return next_day.strftime('%A')
+    # 一日後の曜日を日本語で取得
+    weekdays_jp = ['月', '火', '水', '木', '金', '土', '日']
+    return weekdays_jp[next_day.weekday()]
 
 
 # ダミーユーザークラス
