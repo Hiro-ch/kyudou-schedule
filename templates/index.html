@@ -105,10 +105,7 @@
                         </div>
                         <div class="schedule-item">
                             <label>時間:</label>
-                            <input type="time" id="start_time_{{ date }}" name="start_time_{{ date }}" value="{{ details.start_time }}" disabled>
-                            から
-                            <input type="time" id="end_time_{{ date }}" name="end_time_{{ date }}" value="{{ details.end_time }}" disabled>
-                            まで
+                            <div>{{ details.start_time }}～{{ details.end_time }}</div>
                         </div>
                         <div class="schedule-item">
                             <label for="location_{{ date }}">場所:</label>
