@@ -83,9 +83,6 @@
     </script>
 </head>
 <body>
-    <!-- 下部へ向かうボタン（サイトの上部に配置） -->
-    <button onclick="scrollToBottom()" class="scroll-btn scroll-bottom">↓</button>
-
     <div class="user-status {% if user.is_admin %}admin-status{% else %}user-status-blue{% endif %}">
         {% if user.is_admin %}
             管理者としてログインしています。
@@ -98,6 +95,8 @@
     </div>
 
     <div class="container">
+        <!-- 下部へ向かうボタン（サイトの上部に配置） -->
+        <button onclick="scrollToBottom()" class="scroll-btn scroll-bottom">↓</button>
         {% with messages = get_flashed_messages() %}
             {% if messages %}
             <div class="flash-message">

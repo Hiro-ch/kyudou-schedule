@@ -295,3 +295,11 @@ input[readonly], input:disabled, select:disabled {
         margin-bottom: 10px; /* 「から」や「まで」の下に余白を追加 */
     }
 }
+
+@media screen and (max-width: 424px) {
+    /* 下部へボタン（サイトの上部に配置） */
+    .scroll-bottom {
+        right: 20px;
+        top: 124px; /* サイト上部に配置 */
+    }
+}
