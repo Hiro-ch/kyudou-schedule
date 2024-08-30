@@ -300,6 +300,6 @@ input[readonly], input:disabled, select:disabled {
     /* 下部へボタン（サイトの上部に配置） */
     .scroll-bottom {
         right: 20px;
-        top: 124px; /* サイト上部に配置 */
+        top: 123px; /* サイト上部に配置 */
     }
 }
