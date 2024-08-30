@@ -268,25 +268,8 @@ input[readonly], input:disabled, select:disabled {
         margin-bottom: 10px; /* 「から」や「まで」の下に余白を追加 */
     }
 
-    .schedule-item {
-        width: 100%; /* 予定の幅を100%に設定 */
-        margin-bottom: 15px; /* 各項目の下に余白を追加 */
-        text-align: left; /* 左揃えに設定 */
-    }
-
-    .add-form input[type="time"] {
-        width: 100%; /* 入力フィールドを100%に */
-        margin-bottom: 5px; /* 各入力フィールドの下に余白を追加 */
+    /* 開始時間と終了時間の入力フィールドを左揃えに設定 */
+    .schedule-item input[type="time"] {
         text-align: left; /* 入力内容を左揃えに設定 */
-    }
-
-    .schedule-item label, .schedule-item input[type="time"] {
-        text-align: left; /* ラベルと時間入力フィールドを左揃えに設定 */
-    }
-
-    .schedule-item span {
-        display: block; /* 「から」や「まで」を改行して表示 */
-        margin-bottom: 10px; /* 「から」や「まで」の下に余白を追加 */
-        text-align: left; /* 左揃えに設定 */
     }
 }
