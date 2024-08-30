@@ -171,16 +171,6 @@ def logout():
 @app.route('/')
 @login_required
 def index():
-    # 日本時間のタイムゾーンを設定
-    jst = pytz.timezone('Asia/Tokyo')
-
-    # last_updatedを日本時間に変換（存在する場合のみ）
-    for date, details in schedule_dict.items():
-        if 'last_updated' in details and details['last_updated'] is not None:
-            utc_time = datetime.datetime.strptime(details['last_updated'], '%Y-%m-%d %H:%M:%S')
-            jst_time = utc_time.astimezone(jst)
-            details['last_updated'] = jst_time.strftime('%Y-%m-%d %H:%M:%S')
-
     return render_template('index.html', schedule=schedule_dict, user=current_user)
 
 @app.route('/add', methods=['POST'])
@@ -217,8 +207,9 @@ def add():
     if location == "その他" and custom_location:
         location = custom_location
 
-    # 現在の日時を取得して記録
-    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    # 現在の日本時間を取得して記録
+    jst = pytz.timezone('Asia/Tokyo')
+    now = datetime.datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
 
     schedule_dict[date] = {
         "participants": [p.strip() for p in participants],
@@ -242,7 +233,7 @@ def add():
 
     # 新しいスケジュールの追加を通知
     message = f"新しい練習スケジュールが追加されました。\n日付: {date}\n時間: {start_time} ～ {end_time}\n場所: {location}\n参加者: {'・'.join(schedule_dict[date]['participants'])}さん"
-    send_line_notify(message)
+    #send_line_notify(message)
 
     flash("新しいスケジュールが追加されました。")
     return redirect(url_for('index'))
@@ -276,8 +267,9 @@ def manage():
             if location == "その他" and custom_location:
                 location = custom_location
 
-            # 現在の日時を取得して記録
-            now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            # 現在の日本時間を取得して記録
+            jst = pytz.timezone('Asia/Tokyo')
+            now = datetime.datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
             
             updated = {
                 "participants": [p.strip() for p in participants],
@@ -299,7 +291,7 @@ def manage():
             # 各編集された練習情報を通知
             for date in updated_dates:
                 message = f"練習スケジュールが更新されました。\n日付: {date}\n時間: {schedule_dict[date]['start_time']} ～ {schedule_dict[date]['end_time']}\n場所: {schedule_dict[date]['location']}\n参加者: {'・'.join(schedule_dict[date]['participants'])}さん"
-                send_line_notify(message)
+                #send_line_notify(message)
         
             flash(f"{len(updated_dates)} 件の変更が保存されました。")
         else:
