@@ -297,7 +297,7 @@ def manage():
 
             # 各編集された練習情報を通知
             for date in updated_dates:
-                message = f"練習スケジュールが更新されました。\n日付: {date}\n時間: {schedule_dict[date]['start_time']} - {schedule_dict[date]['end_time']}\n場所: {schedule_dict[date]['location']}\n参加者: {'・'.join(schedule_dict[date]['participants'])}さん"
+                message = f"練習スケジュールが更新されました。\n日付: {date}\n時間: {schedule_dict[date]['start_time']} ～ {schedule_dict[date]['end_time']}\n場所: {schedule_dict[date]['location']}\n参加者: {'・'.join(schedule_dict[date]['participants'])}さん"
                 send_line_notify(message)
         
             flash(f"{len(updated_dates)} 件の変更が保存されました。")
