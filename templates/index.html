@@ -15,6 +15,8 @@
                 document.getElementById('start_time_' + date).disabled = false;
                 document.getElementById('end_time_' + date).disabled = false;
                 document.getElementById('location_' + date).disabled = false;
+                document.getElementById('time_display_' + date).style.display = 'none'; // 非表示
+                document.getElementById('time_edit_' + date).style.display = 'block'; // 表示
             });
             const selectElement = document.getElementById('location_' + date);
             const customInputElement = document.getElementById('custom_location_' + date);
@@ -105,10 +107,14 @@
                         </div>
                         <div class="schedule-item">
                             <label>時間:</label>
-                            <input type="time" id="start_time_{{ date }}" name="start_time_{{ date }}" value="{{ details.start_time }}" disabled>
-                            から
-                            <input type="time" id="end_time_{{ date }}" name="end_time_{{ date }}" value="{{ details.end_time }}" disabled>
-                            まで
+                            <div id="time_display_{{ date }}">
+                                {{ details.start_time }} ～ {{ details.end_time }}
+                            </div>
+                            <div id="time_edit_{{ date }}" style="display: none;">
+                                <input type="time" id="start_time_{{ date }}" name="start_time_{{ date }}" value="{{ details.start_time }}" disabled>
+                                <span>～</span>
+                                <input type="time" id="end_time_{{ date }}" name="end_time_{{ date }}" value="{{ details.end_time }}" disabled>
+                            </div>
                         </div>
                         <div class="schedule-item">
                             <label for="location_{{ date }}">場所:</label>
