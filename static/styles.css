@@ -203,7 +203,7 @@ input[readonly], input:disabled, select:disabled {
 /* 上部へボタン（サイトの下部に配置） */
 .scroll-top {
     right: 20px;
-    bottom: 47px; /* サイト下部に配置 */
+    bottom: 49px; /* サイト下部に配置 */
 }
 
 .add-form .action-buttons {
