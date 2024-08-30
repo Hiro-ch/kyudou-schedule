@@ -54,7 +54,7 @@
                 customInputElement.disabled = true;
             }
         }
-        
+
         function toggleCustomLocationInputNew() {
             const selectElement = document.getElementById('location');
             const customInputElement = document.getElementById('custom_location');
@@ -66,13 +66,26 @@
                 customInputElement.disabled = true;
             }
         }
-        
+
+        // 追加フォームのリセット機能
         function cancelAdding() {
             document.getElementById('add-form').reset();  // 追加フォームを初期化
+        }
+
+        // スクロールボタン機能
+        function scrollToBottom() {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     </script>
 </head>
 <body>
+    <!-- 下部へ向かうボタン（サイトの上部に配置） -->
+    <button onclick="scrollToBottom()" class="scroll-btn scroll-bottom">↓</button>
+
     <div class="user-status {% if user.is_admin %}admin-status{% else %}user-status-blue{% endif %}">
         {% if user.is_admin %}
             管理者としてログインしています。
@@ -179,5 +192,8 @@
             </div>
         </form>
     </div>
+
+    <!-- 上部へ向かうボタン（サイトの下部に配置） -->
+    <button onclick="scrollToTop()" class="scroll-btn scroll-top">↑</button>
 </body>
 </html>

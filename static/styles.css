@@ -179,6 +179,33 @@ input[readonly], input:disabled, select:disabled {
     font-size: 16px;
 }
 
+.scroll-btn {
+    position: fixed;
+    background-color: #008CBA;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 1000;
+}
+
+.scroll-btn:hover {
+    background-color: #005f75;
+}
+
+/* 下部へボタン（サイトの上部に配置） */
+.scroll-bottom {
+    right: 20px;
+    top: 100px; /* サイト上部に配置 */
+}
+
+/* 上部へボタン（サイトの下部に配置） */
+.scroll-top {
+    right: 20px;
+    bottom: 47px; /* サイト下部に配置 */
+}
+
 .add-form .action-buttons {
     justify-content: flex-start; /* ボタンを左揃えにする */
 }
