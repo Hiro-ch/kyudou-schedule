@@ -8,22 +8,46 @@
     <link rel="icon" href="static/images/favicon.ico">
     <script>
         function enableEditing(date) {
+            // チェックされた日付のスケジュールを編集可能にする
             const checkboxes = document.querySelectorAll('input[name="dates"]:checked');
             checkboxes.forEach((checkbox) => {
                 const date = checkbox.value;
-                document.getElementById('participants_' + date).readOnly = false;
+
+                // 参加者のテキストボックスを非表示にし、チェックボックスを表示
+                document.getElementById('participants_' + date).style.display = 'none';
+                document.getElementById('participants_edit_' + date).style.display = 'block';
+
+                // 時間の表示を切り替え
+                document.getElementById('time_display_' + date).style.display = 'none'; // 非表示
+                document.getElementById('time_edit_' + date).style.display = 'block'; // 表示
+
+                // 時間と場所の編集可能状態を切り替え
                 document.getElementById('start_time_' + date).disabled = false;
                 document.getElementById('end_time_' + date).disabled = false;
                 document.getElementById('location_' + date).disabled = false;
-                document.getElementById('time_display_' + date).style.display = 'none'; // 非表示
-                document.getElementById('time_edit_' + date).style.display = 'block'; // 表示
+
+                // 場所の選択が「その他」の場合、カスタム入力フィールドを有効にする
+                const selectElement = document.getElementById('location_' + date);
+                const customInputElement = document.getElementById('custom_location_' + date);
+                selectElement.disabled = false;
+                if (selectElement.value === 'その他') {
+                    customInputElement.disabled = false;
+                }
             });
-            const selectElement = document.getElementById('location_' + date);
-            const customInputElement = document.getElementById('custom_location_' + date);
-            selectElement.disabled = false;
-            if (selectElement.value === 'その他') {
-                customInputElement.disabled = false;
-            }
+        }
+
+        function saveParticipants(date) {
+            const checkboxes = document.querySelectorAll('#participants_edit_' + date + ' input[type="checkbox"]');
+            let selectedParticipants = [];
+
+            checkboxes.forEach((checkbox) => {
+                if (checkbox.checked) {
+                    selectedParticipants.push(checkbox.value);
+                }
+            });
+
+            // チェックされた参加者をテキストボックスに反映
+            document.getElementById('participants_' + date).value = selectedParticipants.join(', ');
         }
 
         function cancelEditing() {
@@ -41,6 +65,28 @@
                 return confirm("ログアウトしますか？");
             }
             return false;
+        }
+
+        function handleSave(date) {
+            saveParticipants(date);  // 参加者の選択を保存
+            if (confirmAction('edit')) {  // 変更の確認
+                const formData = new FormData(document.getElementById('edit-form'));
+                // Ajaxリクエストを送信してフォームデータをバックエンドに送る
+                fetch(`{{ url_for('manage') }}`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        alert(data.message);  // サーバーからのメッセージを表示
+                        location.reload();  // ページをリロードして更新を反映
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            } else {
+            console.log("Confirmation declined");
+            }
         }
 
         function toggleCustomLocationInput(date) {
@@ -106,7 +152,7 @@
         {% endwith %}
 
         <h1>練習スケジュール</h1>
-        <form action="{{ url_for('manage') }}" method="post">
+        <form id="edit-form" action="{{ url_for('manage') }}" method="post">
             <ul class="schedule-list">
                 {% for date, details in schedule.items() %}
                 <li>
@@ -115,7 +161,18 @@
                     <div class="schedule-detail">
                         <div class="schedule-item">
                             <label>参加者:</label>
+                            <!-- 参加者の表示用テキストボックス -->
                             <input type="text" id="participants_{{ date }}" name="participants_{{ date }}" value="{{ details.participants | join(', ') }}" readonly required>
+                    
+                            <!-- 参加者のチェックボックスを表示するコンテナ -->
+                            <div id="participants_edit_{{ date }}" style="display: none;" class="participant-checkbox-container">
+                                {% for participant in participants %}
+                                    <label>
+                                        <input type="checkbox" id="checkbox_{{ date }}_{{ participant }}" name="participants_{{ date }}[]" value="{{ participant }}" {% if participant in details.participants %}checked{% endif %}>
+                                        {{ participant }}
+                                    </label>
+                                {% endfor %}
+                            </div>
                         </div>
                         <div class="schedule-item">
                             <label>時間:</label>
@@ -149,8 +206,8 @@
             </ul>
             <div class="action-buttons">
                 <button type="button" onclick="cancelEditing()" class="cancel-btn">チェックを外す</button>
-                <button type="button" onclick="enableEditing()" class="edit-btn">編集</button>
-                <button type="submit" name="action" value="edit" class="submit-btn" onclick="return confirmAction('edit')">保存</button>
+                <button type="button" onclick="enableEditing('{{ date }}')" class="edit-btn">編集</button>
+                <button type="button" onclick="handleSave('{{ date }}')" class="submit-btn">保存</button>
                 <button type="submit" name="action" value="delete" class="delete-btn" onclick="return confirmAction('delete')">削除</button>
             </div>
         </form>
@@ -162,8 +219,15 @@
                 <input type="date" id="date" name="date" required>
             </div>
             <div class="schedule-item">
-                <label for="participants">参加者:</label>
-                <input type="text" id="participants" name="participants" placeholder="半角スペース区切りで入力" required>
+                <label>参加者:</label>
+                <div class="participant-checkbox-container">
+                    {% for participant in participants %}
+                        <label>
+                            <input type="checkbox" name="participants" value="{{ participant }}">
+                            {{ participant }}
+                        </label>
+                    {% endfor %}
+                </div>
             </div>
             <div class="schedule-item">
                 <label for="start_time">開始時間:</label>
