@@ -228,8 +228,14 @@ def add():
     # スケジュールを保存
     save_schedule(schedule_dict)
 
+    # LINE Notifyの通知内容を設定
+    if "全体練習" in schedule_dict[date]['participants']:
+        participants_str = '全体練習'
+    else:
+        participants_str = '・'.join(schedule_dict[date]['participants']) + 'さん'
+
     # 新しいスケジュールの追加を通知
-    message = f"新しい練習スケジュールが追加されました。\n日付: {date}\n時間: {start_time} ～ {end_time}\n場所: {location}\n参加者: {'・'.join(schedule_dict[date]['participants'])}さん"
+    message = f"新しい練習スケジュールが追加されました。\n日付: {date}\n時間: {start_time} ～ {end_time}\n場所: {location}\n参加者: {participants_str}"
     send_line_notify(message)
 
     flash("新しいスケジュールが追加されました。")
@@ -286,7 +292,13 @@ def manage():
 
             # 各編集された練習情報を通知
             for date in updated_dates:
-                message = f"練習スケジュールが更新されました。\n日付: {date}\n時間: {schedule_dict[date]['start_time']} ～ {schedule_dict[date]['end_time']}\n場所: {schedule_dict[date]['location']}\n参加者: {'・'.join(schedule_dict[date]['participants'])}さん"
+                # LINE Notifyの通知内容を設定
+                if "全体練習" in schedule_dict[date]['participants']:
+                    participants_str = '全体練習'
+                else:
+                    participants_str = '・'.join(schedule_dict[date]['participants']) + 'さん'
+                # 新しいスケジュールの追加を通知
+                message = f"練習スケジュールが更新されました。\n日付: {date}\n時間: {start_time} ～ {end_time}\n場所: {location}\n参加者: {participants_str}"
                 send_line_notify(message)
         
             flash(f"{len(updated_dates)} 件の変更が保存されました。")
