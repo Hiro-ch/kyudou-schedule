@@ -81,6 +81,35 @@ h1, h2 {
     font-weight: bold;
 }
 
+/* フィルターヘッダーのスタイル */
+.filter-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.filter-header label {
+    font-weight: bold;
+    margin-right: 10px;
+    font-size: 16px; /* ラベルのフォントサイズを調整 */
+}
+
+/* フィルター切り替えボタンのスタイル */
+#toggle-filter {
+    background-color: #008CBA; /* ボタンの背景色 */
+    color: white; /* ボタンの文字色 */
+    padding: 5px 10px; /* ボタンのパディング */
+    border: none; /* ボーダーをなくす */
+    border-radius: 4px; /* 角を丸める */
+    cursor: pointer; /* カーソルをポインターにする */
+    font-size: 16px; /* ボタンのフォントサイズ */
+    transition: background-color 0.3s ease; /* ホバー時のトランジション */
+}
+
+#toggle-filter:hover {
+    background-color: #005f75; /* ホバー時の背景色 */
+}
+
 .schedule-list {
     list-style-type: none;
     padding: 0;

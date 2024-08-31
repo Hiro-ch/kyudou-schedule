@@ -7,6 +7,18 @@
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="icon" href="static/images/favicon.ico">
     <script>
+        // フィルターボタンの表示/非表示
+        function toggleFilter() {
+        var filterContainer = document.getElementById("filter-container");
+        var toggleButton = document.getElementById("toggle-filter");
+        if (filterContainer.style.display === "none") {
+            filterContainer.style.display = "block";
+            toggleButton.textContent = "△";  // ボタンのテキストを上向きの不等号に変更
+        } else {
+            filterContainer.style.display = "none";
+            toggleButton.textContent = "▽";  // ボタンのテキストを下向きの不等号に変更
+        }
+    }
         function enableEditing() {
             const checkboxes = document.querySelectorAll('input[name="dates"]:checked');
             checkboxes.forEach((checkbox) => {
@@ -113,20 +125,27 @@
         {% endwith %}
 
         <h1>練習スケジュール</h1>
+        
+        <!-- フィルタリング機能のラベルとボタン -->
+        <div class="filter-header">
+            <label><strong>部員名でフィルター:</strong></label>
+            <button id="toggle-filter" onclick="toggleFilter()">▽</button>
+        </div>
 
-        <!--部員名でフィルタリング-->
-        <form id="filter-form" action="{{ url_for('filter') }}" method="post">
-            <label>部員名でフィルター:</label>
-            <div>
-                {% for participant in participants_names %}
-                    <label class="participant-checkbox">
-                        <input type="checkbox" name="participants_filter" value="{{ participant }}"> <strong>{{ participant }}</strong>
-                    </label>
-                {% endfor %}
-            </div>
-            <button type="submit" class="filter-btn">フィルターを適用</button>
-            <button type="submit" name="show_all" value="true" class="filter-btn">すべて表示</button>
-        </form>
+        <!-- フィルターフォーム -->
+        <div id="filter-container" style="display: none;">
+            <form id="filter-form" action="{{ url_for('filter') }}" method="post">
+                <div>
+                    {% for participant in participants_names %}
+                        <label class="participant-checkbox">
+                            <input type="checkbox" name="participants_filter" value="{{ participant }}"> <strong>{{ participant }}</strong>
+                        </label>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="filter-btn">フィルターを適用</button>
+                <button type="submit" name="show_all" value="true" class="filter-btn">すべて表示</button>
+            </form>
+        </div>
 
         <form action="{{ url_for('manage') }}" method="post">
             <ul class="schedule-list">
