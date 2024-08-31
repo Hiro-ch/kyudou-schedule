@@ -49,6 +49,17 @@ h1, h2 {
     margin-bottom: 20px;
 }
 
+/* 参加者フィルターのチェックボックスと名前のスタイルを調整 */
+.participant-checkbox {
+    display: inline-block;
+    margin-bottom: 10px; /* 下に間隔を追加 */
+    margin-right: 10px; /* 名前とチェックボックスの間のスペースを追加 */
+    padding: 5px; /* チェックボックス全体にパディングを追加して、間隔を広げる */
+    border: 1px solid #ccc; /* ボーダーを追加して視覚的な区切りを作る */
+    border-radius: 4px; /* 角を少し丸める */
+    cursor: pointer; /* マウスカーソルをポインタにする */
+}
+
 /* フィルターボタンのスタイル */
 .filter-btn {
     background-color: #4CAF50; /* 緑色 */

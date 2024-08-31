@@ -119,7 +119,9 @@
             <label>部員名でフィルター:</label>
             <div>
                 {% for participant in participants_names %}
-                    <label><input type="checkbox" name="participants_filter" value="{{ participant }}"> <strong>{{ participant }}</strong></label>
+                    <label class="participant-checkbox">
+                        <input type="checkbox" name="participants_filter" value="{{ participant }}"> <strong>{{ participant }}</strong>
+                    </label>
                 {% endfor %}
             </div>
             <button type="submit" class="filter-btn">フィルターを適用</button>
