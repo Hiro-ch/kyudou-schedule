@@ -370,3 +370,10 @@ input[readonly], input:disabled, select:disabled {
         margin-bottom: 10px; /* 「から」や「まで」の下に余白を追加 */
     }
 }
+
+@media screen and (max-width: 390px) {
+    .filter-btn {
+        margin-bottom: 10px; /* ボタン間に垂直の間隔を追加 */
+        margin-right: 0; /* 横の間隔をリセット */
+    }
+}
