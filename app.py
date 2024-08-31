@@ -40,9 +40,6 @@ USER_PASSWORD = os.getenv('USER_PASSWORD')
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
 
-# 部員の名前を環境変数から取得
-PARTICIPANTS = os.getenv('PARTICIPANTS').split(',')
-
 # 日本語ロケールを設定
 locale.setlocale(locale.LC_ALL, '')
 
@@ -61,6 +58,7 @@ def next_weekday(date_str):
     # 一日後の曜日を日本語で取得
     weekdays_jp = ['月', '火', '水', '木', '金', '土', '日']
     return weekdays_jp[next_day.weekday()]
+
 
 # ダミーユーザークラス
 class User(UserMixin):
@@ -173,7 +171,7 @@ def logout():
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html', schedule=schedule_dict, participants=PARTICIPANTS, user=current_user)
+    return render_template('index.html', schedule=schedule_dict, user=current_user)
 
 @app.route('/add', methods=['POST'])
 @login_required
@@ -196,8 +194,9 @@ def add():
         flash(f"追加しようとしている日はすでに練習が予定されています: {date}")
         return redirect(url_for('index'))
 
-    # 参加者名の入力を取得し、チェックボックスの選択に基づいて参加者リストを作成
-    participants = request.form.getlist('participants')
+    # 参加者名の入力を取得し、半角スペースをカンマに置き換える
+    participants_input = request.form['participants'].replace(' ', ',')
+    participants = participants_input.split(',')
 
     start_time = request.form['start_time']
     end_time = request.form['end_time']
@@ -213,7 +212,7 @@ def add():
     now = datetime.datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
 
     schedule_dict[date] = {
-        "participants": participants,
+        "participants": [p.strip() for p in participants],
         "start_time": start_time,
         "end_time": end_time,
         "location": location,
@@ -256,8 +255,9 @@ def manage():
         for date in selected_dates:
             original = schedule_dict.get(date, {})
             
-            # 参加者名の入力を取得し、チェックボックスの選択に基づいて参加者リストを作成
-            participants = request.form.getlist(f'participants_{date}[]')  # 修正ポイント
+            # 参加者名の入力を取得し、半角スペースをカンマに置き換える
+            participants_input = request.form.get(f'participants_{date}').replace(' ', ',')
+            participants = participants_input.split(',')
             
             start_time = request.form.get(f'start_time_{date}')
             end_time = request.form.get(f'end_time_{date}')
@@ -272,7 +272,7 @@ def manage():
             now = datetime.datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
             
             updated = {
-                "participants": participants,
+                "participants": [p.strip() for p in participants],
                 "start_time": start_time,
                 "end_time": end_time,
                 "location": location,
