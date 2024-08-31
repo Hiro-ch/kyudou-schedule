@@ -143,7 +143,7 @@
                             </div>
                             <div id="participants_edit_{{ date }}" style="display: none;">
                                 {% for participant in participants_names %}
-                                    <label>
+                                    <label class="participant-checkbox">
                                         <input type="checkbox" name="participants_{{ date }}" value="{{ participant }}" {% if participant in details.participants %}checked{% endif %}>
                                         {{ participant }}
                                     </label>
@@ -198,7 +198,9 @@
                 <label for="participants">参加者:</label>
                 <div>
                     {% for participant in participants_names %}
-                        <label><input type="checkbox" name="participants" value="{{ participant }}"> {{ participant }}</label>
+                        <label class="participant-checkbox">
+                            <input type="checkbox" name="participants" value="{{ participant }}"> {{ participant }}
+                        </label>
                     {% endfor %}
                 </div>
             </div>
