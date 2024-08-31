@@ -40,6 +40,9 @@ USER_PASSWORD = os.getenv('USER_PASSWORD')
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
 
+# 環境変数から参加者の名前を取得
+PARTICIPANTS_NAMES = os.getenv('PARTICIPANTS_NAMES', '').split(',')
+
 # 日本語ロケールを設定
 locale.setlocale(locale.LC_ALL, '')
 
@@ -171,7 +174,7 @@ def logout():
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html', schedule=schedule_dict, user=current_user)
+    return render_template('index.html', schedule=schedule_dict, participants_names=PARTICIPANTS_NAMES, user=current_user)
 
 @app.route('/add', methods=['POST'])
 @login_required
@@ -194,9 +197,8 @@ def add():
         flash(f"追加しようとしている日はすでに練習が予定されています: {date}")
         return redirect(url_for('index'))
 
-    # 参加者名の入力を取得し、半角スペースをカンマに置き換える
-    participants_input = request.form['participants'].replace(' ', ',')
-    participants = participants_input.split(',')
+    # チェックボックスから参加者を取得
+    participants = request.form.getlist('participants')
 
     start_time = request.form['start_time']
     end_time = request.form['end_time']
@@ -254,11 +256,8 @@ def manage():
 
         for date in selected_dates:
             original = schedule_dict.get(date, {})
-            
-            # 参加者名の入力を取得し、半角スペースをカンマに置き換える
-            participants_input = request.form.get(f'participants_{date}').replace(' ', ',')
-            participants = participants_input.split(',')
-            
+
+            participants = request.form.get(f'participants_{date}').split(',')
             start_time = request.form.get(f'start_time_{date}')
             end_time = request.form.get(f'end_time_{date}')
             location = request.form.get(f'location_' + date)

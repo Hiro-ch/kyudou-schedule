@@ -163,7 +163,11 @@
             </div>
             <div class="schedule-item">
                 <label for="participants">参加者:</label>
-                <input type="text" id="participants" name="participants" placeholder="半角スペース区切りで入力" required>
+                <div>
+                    {% for participant in participants_names %}
+                        <label><input type="checkbox" name="participants" value="{{ participant }}"> {{ participant }}</label>
+                    {% endfor %}
+                </div>
             </div>
             <div class="schedule-item">
                 <label for="start_time">開始時間:</label>
