@@ -7,27 +7,32 @@
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="icon" href="static/images/favicon.ico">
     <script>
-        function enableEditing(date) {
+        function enableEditing() {
             const checkboxes = document.querySelectorAll('input[name="dates"]:checked');
             checkboxes.forEach((checkbox) => {
                 const date = checkbox.value;
-                document.getElementById('participants_' + date).readOnly = false;
+                document.getElementById('participants_display_' + date).style.display = 'none'; // 参加者名の表示を非表示
+                document.getElementById('participants_edit_' + date).style.display = 'block'; // 参加者のチェックボックスを表示
                 document.getElementById('start_time_' + date).disabled = false;
                 document.getElementById('end_time_' + date).disabled = false;
                 document.getElementById('location_' + date).disabled = false;
-                document.getElementById('time_display_' + date).style.display = 'none'; // 非表示
-                document.getElementById('time_edit_' + date).style.display = 'block'; // 表示
+                document.getElementById('time_display_' + date).style.display = 'none'; // 時間の表示を非表示
+                document.getElementById('time_edit_' + date).style.display = 'block'; // 時間の編集を表示
             });
-            const selectElement = document.getElementById('location_' + date);
-            const customInputElement = document.getElementById('custom_location_' + date);
-            selectElement.disabled = false;
-            if (selectElement.value === 'その他') {
-                customInputElement.disabled = false;
-            }
         }
 
         function cancelEditing() {
-            location.reload();  // ページをリロードして編集をキャンセル
+            const checkboxes = document.querySelectorAll('input[name="dates"]:checked');
+            checkboxes.forEach((checkbox) => {
+                const date = checkbox.value;
+                document.getElementById('participants_display_' + date).style.display = 'block'; // 参加者名の表示を表示
+                document.getElementById('participants_edit_' + date).style.display = 'none'; // 参加者のチェックボックスを非表示
+                document.getElementById('start_time_' + date).disabled = true;
+                document.getElementById('end_time_' + date).disabled = true;
+                document.getElementById('location_' + date).disabled = true;
+                document.getElementById('time_display_' + date).style.display = 'block'; // 時間の表示を表示
+                document.getElementById('time_edit_' + date).style.display = 'none'; // 時間の編集を非表示
+            });
         }
 
         function confirmAction(actionType) {
@@ -115,7 +120,21 @@
                     <div class="schedule-detail">
                         <div class="schedule-item">
                             <label>参加者:</label>
-                            <input type="text" id="participants_{{ date }}" name="participants_{{ date }}" value="{{ details.participants | join(', ') }}" readonly required>
+                            <div id="participants_display_{{ date }}">
+                                {% for participant in participants_names %}
+                                    {% if participant in details.participants %}
+                                        <span>{{ participant }}</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <div id="participants_edit_{{ date }}" style="display: none;">
+                                {% for participant in participants_names %}
+                                    <label>
+                                        <input type="checkbox" name="participants_{{ date }}" value="{{ participant }}" {% if participant in details.participants %}checked{% endif %}>
+                                        {{ participant }}
+                                    </label>
+                                {% endfor %}
+                            </div>
                         </div>
                         <div class="schedule-item">
                             <label>時間:</label>

@@ -1,17 +1,13 @@
 import os
 import json
-from flask import Flask, render_template, redirect, url_for, request, flash, session, jsonify
+from flask import Flask, render_template, redirect, url_for, request, flash, session, jsonify, send_from_directory
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from dotenv import load_dotenv
 import datetime
 import pytz
 import requests
 import locale
-import schedule
-import time
-import threading
 import platform
-from datetime import timedelta
 
 # .envファイルから環境変数をロード
 load_dotenv()
@@ -61,7 +57,6 @@ def next_weekday(date_str):
     # 一日後の曜日を日本語で取得
     weekdays_jp = ['月', '火', '水', '木', '金', '土', '日']
     return weekdays_jp[next_day.weekday()]
-
 
 # ダミーユーザークラス
 class User(UserMixin):
@@ -257,7 +252,9 @@ def manage():
         for date in selected_dates:
             original = schedule_dict.get(date, {})
 
-            participants = request.form.get(f'participants_{date}').split(',')
+            # チェックボックスから選択された参加者を取得
+            participants = request.form.getlist(f'participants_{date}')
+            
             start_time = request.form.get(f'start_time_{date}')
             end_time = request.form.get(f'end_time_{date}')
             location = request.form.get(f'location_' + date)
