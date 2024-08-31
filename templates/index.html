@@ -121,11 +121,8 @@
                         <div class="schedule-item">
                             <label>参加者:</label>
                             <div id="participants_display_{{ date }}">
-                                {% for participant in participants_names %}
-                                    {% if participant in details.participants %}
-                                        <span>{{ participant }}</span>
-                                    {% endif %}
-                                {% endfor %}
+                                <!-- 参加者を「・」でつないで表示 -->
+                                {{ details.participants | join('・') }}
                             </div>
                             <div id="participants_edit_{{ date }}" style="display: none;">
                                 {% for participant in participants_names %}
