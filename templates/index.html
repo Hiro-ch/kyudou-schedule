@@ -22,8 +22,10 @@
         }
 
         function cancelEditing() {
-            const checkboxes = document.querySelectorAll('input[name="dates"]:checked');
+            const checkboxes = document.querySelectorAll('input[name="dates"]');
             checkboxes.forEach((checkbox) => {
+                checkbox.checked = false; // チェックを外す
+
                 const date = checkbox.value;
                 document.getElementById('participants_display_' + date).style.display = 'block'; // 参加者名の表示を表示
                 document.getElementById('participants_edit_' + date).style.display = 'none'; // 参加者のチェックボックスを非表示
