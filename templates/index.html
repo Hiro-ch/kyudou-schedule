@@ -114,8 +114,12 @@
     </div>
 
     <div class="container">
-        <!-- 下部へ向かうボタン（サイトの上部に配置） -->
-        <button onclick="scrollToBottom()" class="scroll-btn scroll-bottom">↓</button>
+        <!-- スクロールボタンを配置 -->
+        <div class="scroll-btn-container">
+            <button onclick="scrollToTop()" class="scroll-btn scroll-top">↑</button>
+            <button onclick="scrollToBottom()" class="scroll-btn scroll-bottom">↓</button>
+        </div>
+        
         {% with messages = get_flashed_messages() %}
             {% if messages %}
             <div class="flash-message">
@@ -249,8 +253,5 @@
             </div>
         </form>
     </div>
-
-    <!-- 上部へ向かうボタン（サイトの下部に配置） -->
-    <button onclick="scrollToTop()" class="scroll-btn scroll-top">↑</button>
 </body>
 </html>
