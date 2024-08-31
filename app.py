@@ -334,5 +334,29 @@ def manage():
 
         return redirect(url_for('index'))
 
+@app.route('/filter', methods=['POST'])
+@login_required
+def filter():
+    # "show_all"がフォームから送信された場合、全てのスケジュールを表示
+    if 'show_all' in request.form:
+        filtered_schedule = schedule_dict
+    else:
+        selected_participants = request.form.getlist('participants_filter')
+
+        if "全体練習" in selected_participants:
+            # 「全体練習」が選択された場合は「全体練習」が含まれる予定のみを表示
+            filtered_schedule = {
+                date: details for date, details in schedule_dict.items()
+                if "全体練習" in details['participants']
+            }
+        else:
+            # 「全体練習」が選択されていない場合はフィルター条件に応じて表示
+            filtered_schedule = {
+                date: details for date, details in schedule_dict.items()
+                if all(participant in details['participants'] for participant in selected_participants) or "全体練習" in details['participants']
+            }
+
+    return render_template('index.html', schedule=filtered_schedule, participants_names=PARTICIPANTS_NAMES, user=current_user)
+
 if __name__ == '__main__':
     app.run(debug=True)

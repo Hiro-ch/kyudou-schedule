@@ -113,6 +113,19 @@
         {% endwith %}
 
         <h1>練習スケジュール</h1>
+
+        <!--部員名でフィルタリング-->
+        <form id="filter-form" action="{{ url_for('filter') }}" method="post">
+            <label>部員名でフィルター:</label>
+            <div>
+                {% for participant in participants_names %}
+                    <label><input type="checkbox" name="participants_filter" value="{{ participant }}"> <strong>{{ participant }}</strong></label>
+                {% endfor %}
+            </div>
+            <button type="submit" class="filter-btn">フィルターを適用</button>
+            <button type="submit" name="show_all" value="true" class="filter-btn">すべて表示</button>
+        </form>
+
         <form action="{{ url_for('manage') }}" method="post">
             <ul class="schedule-list">
                 {% for date, details in schedule.items() %}

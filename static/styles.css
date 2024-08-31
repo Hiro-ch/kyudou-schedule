@@ -49,6 +49,27 @@ h1, h2 {
     margin-bottom: 20px;
 }
 
+/* フィルターボタンのスタイル */
+.filter-btn {
+    background-color: #4CAF50; /* 緑色 */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-right: 10px; /* ボタン間のスペースを調整 */
+}
+
+.filter-btn:hover {
+    background-color: #45a049; /* ホバー時の色を少し暗くする */
+}
+
+/* フィルターフォーム内のチェックボックスラベルを太字にする */
+#filter-form label {
+    font-weight: bold;
+}
+
 .schedule-list {
     list-style-type: none;
     padding: 0;
