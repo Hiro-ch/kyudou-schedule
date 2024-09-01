@@ -299,7 +299,7 @@ def manage():
                     participants_str = '・'.join(schedule_dict[date]['participants']) + 'さん'
                 # 新しいスケジュールの追加を通知
                 message = f"練習スケジュールが更新されました。\n日付: {date}\n時間: {start_time} ～ {end_time}\n場所: {location}\n参加者: {participants_str}"
-                send_line_notify(message)
+                #send_line_notify(message)
         
             flash(f"{len(updated_dates)} 件の変更が保存されました。")
         else:
