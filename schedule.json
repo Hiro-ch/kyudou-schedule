@@ -1,14 +1,4 @@
 {
-
-    "9/2": {
-        "participants": [
-            "笠井"
-        ],
-        "start_time": "10:00",
-        "end_time": "12:00",
-        "location": "広島市立大学",
-        "last_updated": null
-    },
     "9/3": {
         "participants": [
             "笠井",
@@ -81,6 +71,18 @@
     "9/14": {
         "participants": [
             "全体練習"
+        ],
+        "start_time": "10:00",
+        "end_time": "12:00",
+        "location": "広島市立大学",
+        "last_updated": null
+    },
+    "9/15": {
+        "participants": [
+            "坂口",
+            "佐々木",
+            "山崎康",
+            "山﨑大"
         ],
         "start_time": "10:00",
         "end_time": "12:00",
