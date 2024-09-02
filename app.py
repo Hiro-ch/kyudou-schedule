@@ -121,18 +121,20 @@ def get_schedule():
     schedule = load_schedule()
     return jsonify(schedule)
 
-# スケジュールをJSONファイルから再読み込みするAPIエンドポイント
 @app.route('/api/update_schedule', methods=['POST'])
 def update_schedule():
     global schedule_dict
     new_schedule = request.json  # 受け取ったJSONデータを取得
     if new_schedule:
-        schedule_dict = new_schedule  # グローバル変数を更新
+        # 日付をdatetimeオブジェクトに変換して昇順にソート
+        sorted_schedule = dict(sorted(new_schedule.items(), key=lambda item: datetime.datetime.strptime(item[0], '%m/%d')))
+        schedule_dict = sorted_schedule  # グローバル変数を更新
         save_schedule(schedule_dict)  # 新しいスケジュールを保存
         print("スケジュールが更新されました。")
         return jsonify({"message": "スケジュールが更新されました。"}), 200
     else:
         return jsonify({"message": "スケジュールの更新に失敗しました。"}), 400
+
 
 # 一般ユーザー用ログインページのルート
 @app.route('/user_login', methods=['POST'])
