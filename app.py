@@ -199,10 +199,15 @@ def add():
         flash(f"追加しようとしている日はすでに練習が予定されています: {date}")
         return redirect(url_for('index'))
 
-    plan_type = request.form['plan_type']  # 予定を取得
+    plan_type = request.form['plan_type']
+    custom_plan_type = request.form.get('custom_plan_type')
+
+    # 予定が「その他」の場合、自由入力フィールドの値を使う
+    if plan_type == "その他" and custom_plan_type:
+        plan_type = custom_plan_type
+
     # チェックボックスから参加者を取得
     participants = request.form.getlist('participants')
-
     start_time = request.form['start_time']
     end_time = request.form['end_time']
     location = request.form['location']
@@ -267,7 +272,14 @@ def manage():
         for date in selected_dates:
             original = schedule_dict.get(date, {})
 
-            plan_type = request.form.get(f'plan_type_{date}')  # 編集された予定を取得
+             # フォームから「予定」と「カスタム予定」を取得
+            plan_type = request.form.get(f'plan_type_{date}')
+            custom_plan_type = request.form.get(f'custom_plan_type_{date}')
+
+            # 「予定」が「その他」の場合、自由入力された値を使用
+            if plan_type == "その他" and custom_plan_type:
+                plan_type = custom_plan_type
+                
             # チェックボックスから選択された参加者を取得
             participants = request.form.getlist(f'participants_{date}')
             
