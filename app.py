@@ -199,6 +199,7 @@ def add():
         flash(f"追加しようとしている日はすでに練習が予定されています: {date}")
         return redirect(url_for('index'))
 
+    plan_type = request.form['plan_type']  # 予定を取得
     # チェックボックスから参加者を取得
     participants = request.form.getlist('participants')
 
@@ -216,6 +217,7 @@ def add():
     now = datetime.datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
 
     schedule_dict[date] = {
+        "plan_type": plan_type,  # 予定を保存
         "participants": [p.strip() for p in participants],
         "start_time": start_time,
         "end_time": end_time,
@@ -242,7 +244,7 @@ def add():
         participants_str = '・'.join(schedule_dict[date]['participants']) + 'さん'
 
     # 新しいスケジュールの追加を通知
-    message = f"新しい練習スケジュールが追加されました。\n日付: {date}\n時間: {start_time} ～ {end_time}\n場所: {location}\n参加者: {participants_str}"
+    message = f"新しい練習スケジュールが追加されました。\n予定: {plan_type}\n日付: {date}\n時間: {start_time} ～ {end_time}\n場所: {location}\n参加者: {participants_str}"
     send_line_notify(message)
 
     flash("新しいスケジュールが追加されました。")
@@ -265,6 +267,7 @@ def manage():
         for date in selected_dates:
             original = schedule_dict.get(date, {})
 
+            plan_type = request.form.get(f'plan_type_{date}')  # 編集された予定を取得
             # チェックボックスから選択された参加者を取得
             participants = request.form.getlist(f'participants_{date}')
             
@@ -281,6 +284,7 @@ def manage():
             now = datetime.datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
             
             updated = {
+                "plan_type": plan_type,  # 予定を更新
                 "participants": [p.strip() for p in participants],
                 "start_time": start_time,
                 "end_time": end_time,
@@ -305,7 +309,7 @@ def manage():
                 else:
                     participants_str = '・'.join(schedule_dict[date]['participants']) + 'さん'
                 # 新しいスケジュールの追加を通知
-                message = f"練習スケジュールが更新されました。\n日付: {date}\n時間: {start_time} ～ {end_time}\n場所: {location}\n参加者: {participants_str}"
+                message = f"練習スケジュールが更新されました。\n予定: {plan_type}\n日付: {date}\n時間: {start_time} ～ {end_time}\n場所: {location}\n参加者: {participants_str}"
                 #send_line_notify(message)
         
             flash(f"{len(updated_dates)} 件の変更が保存されました。")
