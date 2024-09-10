@@ -1,5 +1,6 @@
 {
     "9/12": {
+        "plan_type": "個人練習",
         "participants": [
             "前田",
             "笠井",
@@ -11,8 +12,9 @@
         "last_updated": null
     },
     "9/14": {
+        "plan_type": "全体練習",
         "participants": [
-            "全体練習"
+            "全員"
         ],
         "start_time": "10:00",
         "end_time": "12:00",
@@ -20,6 +22,7 @@
         "last_updated": null
     },
     "9/15": {
+        "plan_type": "個人練習",
         "participants": [
             "坂口",
             "佐々木",
@@ -32,6 +35,7 @@
         "last_updated": null
     },
     "9/18": {
+        "plan_type": "個人練習",
         "participants": [
             "山崎康",
             "佐々木",
@@ -47,6 +51,7 @@
         "last_updated": null
     },
     "9/19": {
+        "plan_type": "個人練習",
         "participants": [
             "山崎康",
             "佐々木",
@@ -63,8 +68,9 @@
         "last_updated": null
     },
     "9/21": {
+        "plan_type": "全体練習",
         "participants": [
-            "全体練習"
+            "全員"
         ],
         "start_time": "10:00",
         "end_time": "12:00",

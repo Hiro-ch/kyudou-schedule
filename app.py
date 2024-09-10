@@ -238,8 +238,8 @@ def add():
     save_schedule(schedule_dict)
 
     # LINE Notifyの通知内容を設定
-    if "全体練習" in schedule_dict[date]['participants']:
-        participants_str = '全体練習'
+    if "全員" in schedule_dict[date]['participants']:
+        participants_str = '全員'
     else:
         participants_str = '・'.join(schedule_dict[date]['participants']) + 'さん'
 
@@ -304,8 +304,8 @@ def manage():
             # 各編集された練習情報を通知
             for date in updated_dates:
                 # LINE Notifyの通知内容を設定
-                if "全体練習" in schedule_dict[date]['participants']:
-                    participants_str = '全体練習'
+                if "全員" in schedule_dict[date]['participants']:
+                    participants_str = '全員'
                 else:
                     participants_str = '・'.join(schedule_dict[date]['participants']) + 'さん'
                 # 新しいスケジュールの追加を通知
@@ -354,20 +354,22 @@ def filter():
     else:
         selected_participants = request.form.getlist('participants_filter')
 
-        if "全体練習" in selected_participants:
-            # 「全体練習」が選択された場合は「全体練習」が含まれる予定のみを表示
+        # 全員が選択されたかどうかを判定
+        if set(selected_participants) == set(PARTICIPANTS_NAMES):
+            # 全員が選ばれた場合、予定が「全体練習」のスケジュールを表示
             filtered_schedule = {
                 date: details for date, details in schedule_dict.items()
-                if "全体練習" in details['participants']
+                if details.get('plan_type') == "全体練習"  # 予定が「全体練習」かを判定
             }
         else:
-            # 「全体練習」が選択されていない場合はフィルター条件に応じて表示
+            # 一部の部員が選択された場合、選択された部員が参加しているか、全体練習が含まれるスケジュールを表示
             filtered_schedule = {
                 date: details for date, details in schedule_dict.items()
-                if all(participant in details['participants'] for participant in selected_participants) or "全体練習" in details['participants']
+                if all(participant in details['participants'] for participant in selected_participants) or details.get('plan_type') == "全体練習"
             }
 
     return render_template('index.html', schedule=filtered_schedule, participants_names=PARTICIPANTS_NAMES, user=current_user)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
