@@ -23,6 +23,7 @@
             const checkboxes = document.querySelectorAll('input[name="dates"]:checked');
             checkboxes.forEach((checkbox) => {
                 const date = checkbox.value;
+                document.getElementById('plan_type_' + date).disabled = false; // 予定のドロップダウンメニューを有効にする
                 document.getElementById('participants_display_' + date).style.display = 'none'; // 参加者名の表示を非表示
                 document.getElementById('participants_edit_' + date).style.display = 'block'; // 参加者のチェックボックスを表示
                 document.getElementById('start_time_' + date).disabled = false;
@@ -39,6 +40,7 @@
                 checkbox.checked = false; // チェックを外す
 
                 const date = checkbox.value;
+                document.getElementById('plan_type_' + date).disabled = true; // 予定のドロップダウンメニューを再度無効にする
                 document.getElementById('participants_display_' + date).style.display = 'block'; // 参加者名の表示を表示
                 document.getElementById('participants_edit_' + date).style.display = 'none'; // 参加者のチェックボックスを非表示
                 document.getElementById('start_time_' + date).disabled = true;
@@ -159,6 +161,14 @@
                     <strong>{{ date }} ({{ date | next_weekday }})</strong>
                     <div class="schedule-detail">
                         <div class="schedule-item">
+                            <label for="plan_type_{{ date }}">予定:</label>
+                            <select id="plan_type_{{ date }}" name="plan_type_{{ date }}" disabled>
+                                <option value="全体" {% if details.plan_type == "全体練習" %}selected{% endif %}>全体練習</option>
+                                <option value="班" {% if details.plan_type == "班練習" %}selected{% endif %}>班練習</option>
+                                <option value="クラブ調整会議" {% if details.plan_type == "クラブ調整会議" %}selected{% endif %}>クラブ調整会議</option>
+                            </select>
+                        </div>
+                        <div class="schedule-item">
                             <label>参加者:</label>
                             <div id="participants_display_{{ date }}">
                                 <!-- 参加者を「・」でつないで表示 -->
@@ -216,6 +226,14 @@
             <div class="schedule-item">
                 <label for="date">日付:</label>
                 <input type="date" id="date" name="date" required>
+            </div>
+            <div class="schedule-item">
+                <label for="plan_type">予定:</label>
+                <select id="plan_type" name="plan_type" required>
+                    <option value="全体">全体練習</option>
+                    <option value="班">班練習</option>
+                    <option value="クラブ調整会議">クラブ調整会議</option>
+                </select>
             </div>
             <div class="schedule-item">
                 <label for="participants">参加者:</label>
