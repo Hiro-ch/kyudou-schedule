@@ -163,8 +163,8 @@
                         <div class="schedule-item">
                             <label for="plan_type_{{ date }}">予定:</label>
                             <select id="plan_type_{{ date }}" name="plan_type_{{ date }}" disabled>
-                                <option value="全体" {% if details.plan_type == "全体練習" %}selected{% endif %}>全体練習</option>
-                                <option value="班" {% if details.plan_type == "班練習" %}selected{% endif %}>班練習</option>
+                                <option value="全体練習" {% if details.plan_type == "全体練習" %}selected{% endif %}>全体練習</option>
+                                <option value="個人練習" {% if details.plan_type == "個人練習" %}selected{% endif %}>個人練習</option>
                                 <option value="クラブ調整会議" {% if details.plan_type == "クラブ調整会議" %}selected{% endif %}>クラブ調整会議</option>
                             </select>
                         </div>
@@ -230,8 +230,8 @@
             <div class="schedule-item">
                 <label for="plan_type">予定:</label>
                 <select id="plan_type" name="plan_type" required>
-                    <option value="全体">全体練習</option>
-                    <option value="班">班練習</option>
+                    <option value="全体練習">全体練習</option>
+                    <option value="個人練習">個人練習</option>
                     <option value="クラブ調整会議">クラブ調整会議</option>
                 </select>
             </div>
