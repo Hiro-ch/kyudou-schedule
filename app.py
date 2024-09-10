@@ -250,7 +250,7 @@ def add():
 
     # 新しいスケジュールの追加を通知
     message = f"新しい練習スケジュールが追加されました。\n予定: {plan_type}\n日付: {date}\n時間: {start_time} ～ {end_time}\n場所: {location}\n参加者: {participants_str}"
-    send_line_notify(message)
+    #send_line_notify(message)
 
     flash("新しいスケジュールが追加されました。")
     return redirect(url_for('index'))
@@ -348,7 +348,7 @@ def manage():
 
             # 削除された情報を通知
             message = f"練習スケジュールが削除されました。\n日付: {', '.join(deleted_dates)}"
-            send_line_notify(message)
+            #send_line_notify(message)
         
             # 削除された件数をflashメッセージで表示
             flash(f"{len(deleted_dates)} 件のスケジュールが削除されました。")
