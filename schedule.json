@@ -1,16 +1,4 @@
 {
-    "9/12": {
-        "plan_type": "個人練習",
-        "participants": [
-            "前田",
-            "笠井",
-            "真鍋"
-        ],
-        "start_time": "10:00",
-        "end_time": "12:00",
-        "location": "広島市立大学",
-        "last_updated": null
-    },
     "9/14": {
         "plan_type": "全体練習",
         "participants": [
