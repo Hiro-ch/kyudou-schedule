@@ -133,13 +133,32 @@
             document.getElementById('add-form').reset();  // 追加フォームを初期化
         }
 
-        // スクロールボタン機能
         function scrollToBottom() {
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            const checkedCheckboxes = document.querySelectorAll('input[name="dates"]:checked');
+            if (checkedCheckboxes.length > 0) {
+            // 編集ボタンが含まれるコンテナにスクロール
+            const editContainer = document.querySelector('.action-buttons');
+            if (editContainer) {
+                const containerPosition = editContainer.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 2) + (editContainer.offsetHeight / 2);
+                window.scrollTo({ top: containerPosition, behavior: 'smooth' });
+            }
+            } else {
+                // 通常の最下部にスクロール
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }
         }
 
         function scrollToTop() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const checkedCheckboxes = document.querySelectorAll('input[name="dates"]:checked');
+            if (checkedCheckboxes.length > 0) {
+                // 一番上のチェックされた予定にスクロール
+                const firstChecked = checkedCheckboxes[0];
+                const targetPosition = firstChecked.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 2);
+                window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+            } else {
+                // 通常の最上部にスクロール
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
     </script>
 </head>
