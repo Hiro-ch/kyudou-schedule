@@ -1,27 +1,5 @@
 {
-    "9/14": {
-        "plan_type": "全体練習",
-        "participants": [
-            "全員"
-        ],
-        "start_time": "10:00",
-        "end_time": "12:00",
-        "location": "広島市立大学",
-        "last_updated": null
-    },
-    "9/15": {
-        "plan_type": "個人練習",
-        "participants": [
-            "坂口",
-            "佐々木",
-            "山崎康",
-            "山﨑大"
-        ],
-        "start_time": "10:00",
-        "end_time": "12:00",
-        "location": "広島市立大学",
-        "last_updated": null
-    },
+
     "9/18": {
         "plan_type": "個人練習",
         "participants": [
@@ -31,7 +9,8 @@
             "笠井",
             "堀田",
             "真鍋",
-            "山﨑大"
+            "山﨑大",
+            "平井"
         ],
         "start_time": "10:00",
         "end_time": "12:00",
@@ -42,7 +21,6 @@
         "plan_type": "個人練習",
         "participants": [
             "山崎康",
-            "佐々木",
             "笠井",
             "堀田",
             "平井",
