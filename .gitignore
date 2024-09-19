@@ -16,3 +16,6 @@ pyvenv.cfg
 *.log
 *.sqlite3
 *.db
+
+# ラズパイ用pyファイル
+kyudou.py
