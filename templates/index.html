@@ -73,7 +73,20 @@
             } else if (actionType === 'edit') {
                 return confirm("変更を保存しますか？");
             } else if (actionType === 'add') {
-                return confirm("新しいスケジュールを追加しますか？");
+                // 追加する内容を取得
+                const date = document.getElementById('date').value;
+                const planType = document.getElementById('plan_type').value;
+                const customPlan = document.getElementById('custom_plan_type').value;
+                const participants = Array.from(document.querySelectorAll('input[name="participants"]:checked')).map(el => el.value).join('、');
+                const startTime = document.getElementById('start_time').value;
+                const endTime = document.getElementById('end_time').value;
+                const location = document.getElementById('location').value;
+                const customLocation = document.getElementById('custom_location').value;
+
+                // 確認メッセージを作成
+                const confirmationMessage = `新しいスケジュールを追加しますか？\n\n日付: ${date}\n予定: ${customPlan || planType}\n参加者: ${participants}\n時間: ${startTime} ～ ${endTime}\n場所: ${customLocation || location}`;
+
+                return confirm(confirmationMessage); // 確認ダイアログに表示
             } else if (actionType === 'logout') {
                 return confirm("ログアウトしますか？");
             }
