@@ -71,13 +71,42 @@
             if (actionType === 'delete') {
                 return confirm("本当に削除しますか？");
             } else if (actionType === 'edit') {
-                return confirm("変更を保存しますか？");
+                // 編集後の内容を取得
+                const selectedDates = Array.from(document.querySelectorAll('input[name="dates"]:checked')).map(el => el.value);
+
+                if (selectedDates.length === 0) {
+                    alert("編集する項目を選択してください。");
+                    return false;
+                }
+
+                let confirmationMessage = "以下の内容で変更を保存しますか？\n\n";
+
+                selectedDates.forEach(date => {
+                    const planType = document.getElementById('plan_type_' + date).value;
+                    const customPlan = document.getElementById('custom_plan_type_' + date).value;
+                    const participants = Array.from(document.querySelectorAll('input[name="participants_' + date + '"]:checked')).map(el => el.value).join('・');
+                    const startTime = document.getElementById('start_time_' + date).value;
+                    const endTime = document.getElementById('end_time_' + date).value;
+                    const location = document.getElementById('location_' + date).value;
+                    const customLocation = document.getElementById('custom_location_' + date).value;
+
+                    // 確認メッセージに編集後の情報を追加
+                    confirmationMessage += `日付: ${date}\n予定: ${customPlan || planType}\n参加者: ${participants}\n時間: ${startTime} ～ ${endTime}\n場所: ${customLocation || location}\n\n`;
+                });
+
+                // 確認ダイアログを表示し、キャンセルされた場合はcancelEditingを呼び出す
+                if (!confirm(confirmationMessage)) {
+                    cancelEditing();  // キャンセルボタンが押されたらcancelEditing関数を呼び出す
+                    return false;
+                }
+                return true;
+
             } else if (actionType === 'add') {
                 // 追加する内容を取得
                 const date = document.getElementById('date').value;
                 const planType = document.getElementById('plan_type').value;
                 const customPlan = document.getElementById('custom_plan_type').value;
-                const participants = Array.from(document.querySelectorAll('input[name="participants"]:checked')).map(el => el.value).join('、');
+                const participants = Array.from(document.querySelectorAll('input[name="participants"]:checked')).map(el => el.value).join('・');
                 const startTime = document.getElementById('start_time').value;
                 const endTime = document.getElementById('end_time').value;
                 const location = document.getElementById('location').value;
@@ -86,7 +115,13 @@
                 // 確認メッセージを作成
                 const confirmationMessage = `新しいスケジュールを追加しますか？\n\n日付: ${date}\n予定: ${customPlan || planType}\n参加者: ${participants}\n時間: ${startTime} ～ ${endTime}\n場所: ${customLocation || location}`;
 
-                return confirm(confirmationMessage); // 確認ダイアログに表示
+                // 確認ダイアログを表示し、キャンセルされた場合はcancelAddingを呼び出す
+                if (!confirm(confirmationMessage)) {
+                    cancelAdding();  // キャンセルボタンが押されたらcancelAdding関数を呼び出す
+                    return false;
+                }
+                return true;
+
             } else if (actionType === 'logout') {
                 return confirm("ログアウトしますか？");
             }
