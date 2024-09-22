@@ -19,3 +19,4 @@ pyvenv.cfg
 
 # ラズパイ用pyファイル
 kyudou.py
+discord_notify.py
