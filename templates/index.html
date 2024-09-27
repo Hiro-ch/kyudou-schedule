@@ -3,10 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>練習スケジュール管理</title>
+    <title>広島市立大学弓道部予定管理</title>
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="icon" href="static/images/favicon.ico">
     <script>
+        // CSS.escape() のポリフィル
+        if (!CSS.escape) {
+            CSS.escape = function(value) {
+                return value.replace(/([ #;?%&,.+*~\':"!^$[\]()=>|/@])/g,'\\$1');
+            };
+        }
+
         // フィルターボタンの表示/非表示
         function toggleFilter() {
             var filterContainer = document.getElementById("filter-container");
@@ -20,13 +27,155 @@
             }
         }
 
+        function cancelEditing() {
+    const checkboxes = document.querySelectorAll('input[name="dates"]');
+    checkboxes.forEach((checkbox) => {
+        checkbox.checked = false;
+
+        const date = checkbox.value;
+
+        // 複数の予定がある場合の対応
+        const scheduleItems = document.querySelectorAll(`[id^="plan_type_${CSS.escape(date)}_"]`);
+        if (scheduleItems.length > 0) {
+            scheduleItems.forEach((_, index) => {
+                index += 1; // インデックスを1から開始
+                // 各予定の値を元に戻す
+                const planTypeElement = document.getElementById(`plan_type_${date}_${index}`);
+                const customPlanTypeElement = document.getElementById(`custom_plan_type_${date}_${index}`);
+                const originalPlanTypeValue = planTypeElement.getAttribute('data-original-value');
+
+                if (planTypeElement) {
+                    // 元の値が選択肢に含まれているかチェック
+                    if (["全体練習", "個人練習", "クラブ調整会議"].includes(originalPlanTypeValue)) {
+                        planTypeElement.value = originalPlanTypeValue;
+                        customPlanTypeElement.value = ''; // カスタム入力をクリア
+                    } else {
+                        planTypeElement.value = 'その他';
+                        customPlanTypeElement.value = originalPlanTypeValue;
+                    }
+                    planTypeElement.disabled = true;
+                }
+                if (customPlanTypeElement) {
+                    customPlanTypeElement.disabled = true;
+                    customPlanTypeElement.style.display = (planTypeElement.value === 'その他') ? 'inline' : 'none';
+                }
+
+                // 場所の値を元に戻す
+                const locationElement = document.getElementById(`location_${date}_${index}`);
+                const customLocationElement = document.getElementById(`custom_location_${date}_${index}`);
+                const originalLocationValue = locationElement.getAttribute('data-original-value');
+
+                if (locationElement) {
+                    // 元の値が選択肢に含まれているかチェック
+                    if (["広島市立大学", "県立総合体育館弓道場"].includes(originalLocationValue)) {
+                        locationElement.value = originalLocationValue;
+                        customLocationElement.value = ''; // カスタム入力をクリア
+                    } else {
+                        locationElement.value = 'その他';
+                        customLocationElement.value = originalLocationValue;
+                    }
+                    locationElement.disabled = true;
+                }
+                if (customLocationElement) {
+                    customLocationElement.disabled = true;
+                    customLocationElement.style.display = (locationElement.value === 'その他') ? 'inline' : 'none';
+                }
+
+                // カスタム入力欄の表示を更新
+                toggleCustomPlanTypeInput(date, index);
+                toggleCustomLocationInput(date, index);
+
+                // 参加者の表示を元に戻す
+                document.getElementById(`participants_display_${date}_${index}`).style.display = 'block';
+                document.getElementById(`participants_edit_${date}_${index}`).style.display = 'none';
+                document.querySelectorAll(`#participants_edit_${CSS.escape(date)}_${index} input[type="checkbox"]`).forEach((cb) => cb.disabled = true);
+
+                // 時間の値を元に戻す
+                const startTimeElement = document.getElementById(`start_time_${date}_${index}`);
+                const endTimeElement = document.getElementById(`end_time_${date}_${index}`);
+                if (startTimeElement && endTimeElement) {
+                    startTimeElement.value = startTimeElement.getAttribute('data-original-value');
+                    endTimeElement.value = endTimeElement.getAttribute('data-original-value');
+                    startTimeElement.disabled = true;
+                    endTimeElement.disabled = true;
+                }
+                document.getElementById(`time_display_${date}_${index}`).style.display = 'block';
+                document.getElementById(`time_edit_${date}_${index}`).style.display = 'none';
+            });
+        } else {
+            // 予定が1つしかない場合の対応
+            const planTypeElement = document.getElementById(`plan_type_${date}`);
+            const customPlanTypeElement = document.getElementById(`custom_plan_type_${date}`);
+            const originalPlanTypeValue = planTypeElement.getAttribute('data-original-value');
+
+            if (planTypeElement) {
+                // 元の値が選択肢に含まれているかチェック
+                if (["全体練習", "個人練習", "クラブ調整会議"].includes(originalPlanTypeValue)) {
+                    planTypeElement.value = originalPlanTypeValue;
+                    customPlanTypeElement.value = ''; // カスタム入力をクリア
+                } else {
+                    planTypeElement.value = 'その他';
+                    customPlanTypeElement.value = originalPlanTypeValue;
+                }
+                planTypeElement.disabled = true;
+            }
+            if (customPlanTypeElement) {
+                customPlanTypeElement.disabled = true;
+                customPlanTypeElement.style.display = (planTypeElement.value === 'その他') ? 'inline' : 'none';
+            }
+
+            // 場所の値を元に戻す
+            const locationElement = document.getElementById(`location_${date}`);
+            const customLocationElement = document.getElementById(`custom_location_${date}`);
+            const originalLocationValue = locationElement.getAttribute('data-original-value');
+
+            if (locationElement) {
+                // 元の値が選択肢に含まれているかチェック
+                if (["広島市立大学", "県立総合体育館弓道場"].includes(originalLocationValue)) {
+                    locationElement.value = originalLocationValue;
+                    customLocationElement.value = ''; // カスタム入力をクリア
+                } else {
+                    locationElement.value = 'その他';
+                    customLocationElement.value = originalLocationValue;
+                }
+                locationElement.disabled = true;
+            }
+            if (customLocationElement) {
+                customLocationElement.disabled = true;
+                customLocationElement.style.display = (locationElement.value === 'その他') ? 'inline' : 'none';
+            }
+
+            // カスタム入力欄の表示を更新
+            toggleCustomPlanTypeInput(date);
+            toggleCustomLocationInput(date);
+
+            // 参加者の表示を元に戻す
+            document.getElementById(`participants_display_${date}`).style.display = 'block';
+            document.getElementById(`participants_edit_${date}`).style.display = 'none';
+            document.querySelectorAll(`#participants_edit_${CSS.escape(date)} input[type="checkbox"]`).forEach((cb) => cb.disabled = true);
+
+            // 時間の値を元に戻す
+            const startTimeElement = document.getElementById(`start_time_${date}`);
+            const endTimeElement = document.getElementById(`end_time_${date}`);
+            if (startTimeElement && endTimeElement) {
+                startTimeElement.value = startTimeElement.getAttribute('data-original-value');
+                endTimeElement.value = endTimeElement.getAttribute('data-original-value');
+                startTimeElement.disabled = true;
+                endTimeElement.disabled = true;
+            }
+            document.getElementById(`time_display_${date}`).style.display = 'block';
+            document.getElementById(`time_edit_${date}`).style.display = 'none';
+        }
+    });
+}
+
         function enableEditing() {
             const checkboxes = document.querySelectorAll('input[name="dates"]:checked');
             checkboxes.forEach((checkbox) => {
                 const date = checkbox.value;
 
-                // まずは複数予定がある場合に対応
-                const scheduleItems = document.querySelectorAll(`[id^="plan_type_${date}_"]`);  // 複数の予定がある場合
+                // 複数予定がある場合に対応
+                const scheduleItems = document.querySelectorAll(`[id^="plan_type_${CSS.escape(date)}_"]`);
                 if (scheduleItems.length > 0) {
                     scheduleItems.forEach((_, index) => {
                         index += 1; // インデックスを1から開始
@@ -34,10 +183,11 @@
                         document.getElementById(`custom_plan_type_${date}_${index}`).disabled = false;
                         document.getElementById(`participants_display_${date}_${index}`).style.display = 'none';
                         document.getElementById(`participants_edit_${date}_${index}`).style.display = 'block';
+                        document.querySelectorAll(`#participants_edit_${CSS.escape(date)}_${index} input[type="checkbox"]`).forEach((cb) => cb.disabled = false);
                         document.getElementById(`start_time_${date}_${index}`).disabled = false;
                         document.getElementById(`end_time_${date}_${index}`).disabled = false;
                         document.getElementById(`location_${date}_${index}`).disabled = false;
-                        document.getElementById(`custom_location_${date}_${index}`).disabled = false; // 追加
+                        document.getElementById(`custom_location_${date}_${index}`).disabled = false;
                         document.getElementById(`time_display_${date}_${index}`).style.display = 'none';
                         document.getElementById(`time_edit_${date}_${index}`).style.display = 'block';
 
@@ -51,10 +201,11 @@
                     document.getElementById(`custom_plan_type_${date}`).disabled = false;
                     document.getElementById(`participants_display_${date}`).style.display = 'none';
                     document.getElementById(`participants_edit_${date}`).style.display = 'block';
+                    document.querySelectorAll(`#participants_edit_${CSS.escape(date)} input[type="checkbox"]`).forEach((cb) => cb.disabled = false);
                     document.getElementById(`start_time_${date}`).disabled = false;
                     document.getElementById(`end_time_${date}`).disabled = false;
                     document.getElementById(`location_${date}`).disabled = false;
-                    document.getElementById(`custom_location_${date}`).disabled = false; // 追加
+                    document.getElementById(`custom_location_${date}`).disabled = false;
                     document.getElementById(`time_display_${date}`).style.display = 'none';
                     document.getElementById(`time_edit_${date}`).style.display = 'block';
 
@@ -65,96 +216,82 @@
             });
         }
 
-        // キャンセルボタンを押した際、変更を破棄して元に戻す
-        function cancelEditing() {
-            const checkboxes = document.querySelectorAll('input[name="dates"]');
-            checkboxes.forEach((checkbox) => {
-                checkbox.checked = false;
-
-                const date = checkbox.value;
-
-                // まずは複数の予定がある場合の対応
-                const scheduleItems = document.querySelectorAll(`[id^="plan_type_${date}_"]`);  // 複数の予定がある場合
-                if (scheduleItems.length > 0) {
-                    scheduleItems.forEach((_, index) => {
-                        index += 1; // インデックスを1から開始
-                        // 各予定の値を元に戻す
-                        const planTypeElement = document.getElementById(`plan_type_${date}_${index}`);
-                        const customPlanTypeElement = document.getElementById(`custom_plan_type_${date}_${index}`);
-
-                        if (planTypeElement) {
-                            planTypeElement.value = planTypeElement.getAttribute('data-original-value');
-                            planTypeElement.disabled = true;
-                        }
-                        if (customPlanTypeElement) {
-                            customPlanTypeElement.value = customPlanTypeElement.getAttribute('data-original-value');
-                            customPlanTypeElement.disabled = true;
-                            customPlanTypeElement.style.display = 'none';
-                        }
-
-                        // 場所の値を元に戻す
-                        const locationElement = document.getElementById(`location_${date}_${index}`);
-                        const customLocationElement = document.getElementById(`custom_location_${date}_${index}`);
-
-                        if (locationElement) {
-                            locationElement.value = locationElement.getAttribute('data-original-value');
-                            locationElement.disabled = true;
-                        }
-                        if (customLocationElement) {
-                            customLocationElement.value = customLocationElement.getAttribute('data-original-value');
-                            customLocationElement.disabled = true;
-                            customLocationElement.style.display = 'none';
-                        }
-
-                        // 他の項目を元に戻す
-                        document.getElementById(`participants_display_${date}_${index}`).style.display = 'block';
-                        document.getElementById(`participants_edit_${date}_${index}`).style.display = 'none';
-                        document.getElementById(`start_time_${date}_${index}`).disabled = true;
-                        document.getElementById(`end_time_${date}_${index}`).disabled = true;
-                        document.getElementById(`time_display_${date}_${index}`).style.display = 'block';
-                        document.getElementById(`time_edit_${date}_${index}`).style.display = 'none';
-                    });
-                } else {
-                    // 予定が1つしかない場合の対応
-                    const planTypeElement = document.getElementById(`plan_type_${date}`);
-                    const customPlanTypeElement = document.getElementById(`custom_plan_type_${date}`);
-
-                    if (planTypeElement) {
-                        planTypeElement.value = planTypeElement.getAttribute('data-original-value');
-                        planTypeElement.disabled = true;
-                    }
-                    if (customPlanTypeElement) {
-                        customPlanTypeElement.value = customPlanTypeElement.getAttribute('data-original-value');
-                        customPlanTypeElement.disabled = true;
-                        customPlanTypeElement.style.display = 'none';
-                    }
-
-                    // 場所の値を元に戻す
-                    const locationElement = document.getElementById(`location_${date}`);
-                    const customLocationElement = document.getElementById(`custom_location_${date}`);
-
-                    if (locationElement) {
-                        locationElement.value = locationElement.getAttribute('data-original-value');
-                        locationElement.disabled = true;
-                    }
-                    if (customLocationElement) {
-                        customLocationElement.value = customLocationElement.getAttribute('data-original-value');
-                        customLocationElement.disabled = true;
-                        customLocationElement.style.display = 'none';
-                    }
-
-                    document.getElementById(`participants_display_${date}`).style.display = 'block';
-                    document.getElementById(`participants_edit_${date}`).style.display = 'none';
-                    document.getElementById(`start_time_${date}`).disabled = true;
-                    document.getElementById(`end_time_${date}`).disabled = true;
-                    document.getElementById(`time_display_${date}`).style.display = 'block';
-                    document.getElementById(`time_edit_${date}`).style.display = 'none';
-                }
-            });
-        }
-
         function confirmAction(actionType) {
-            // この関数内の修正は必要に応じて行ってください
+            if (actionType === 'delete') {
+                return confirm("本当に削除しますか？");
+            } else if (actionType === 'edit') {
+                // 編集後の内容を取得
+                const selectedDates = Array.from(document.querySelectorAll('input[name="dates"]:checked')).map(el => el.value);
+
+                if (selectedDates.length === 0) {
+                    alert("編集する項目を選択してください。");
+                    return false;
+                }
+
+                let confirmationMessage = "以下の内容で変更を保存しますか？\n\n";
+
+                selectedDates.forEach(date => {
+                    const scheduleItems = document.querySelectorAll(`[id^="plan_type_${CSS.escape(date)}_"]`);
+                    if (scheduleItems.length > 0) {
+                        scheduleItems.forEach((_, index) => {
+                            index += 1; // インデックスを1から開始
+                            const planType = document.getElementById(`plan_type_${date}_${index}`).value;
+                            const customPlan = document.getElementById(`custom_plan_type_${date}_${index}`).value;
+                            const participants = Array.from(document.querySelectorAll(`input[name="participants_${CSS.escape(date)}_${index}[]"]:checked`)).map(el => el.value).join('・');
+                            const startTime = document.getElementById(`start_time_${date}_${index}`).value;
+                            const endTime = document.getElementById(`end_time_${date}_${index}`).value;
+                            const location = document.getElementById(`location_${date}_${index}`).value;
+                            const customLocation = document.getElementById(`custom_location_${date}_${index}`).value;
+
+                            // 確認メッセージに編集後の情報を追加
+                            confirmationMessage += `日付: ${date}\n予定: ${customPlan || planType}\n参加者: ${participants}\n時間: ${startTime} ～ ${endTime}\n場所: ${customLocation || location}\n\n`;
+                        });
+                    } else {
+                        const planType = document.getElementById(`plan_type_${date}`).value;
+                        const customPlan = document.getElementById(`custom_plan_type_${date}`).value;
+                        const participants = Array.from(document.querySelectorAll(`input[name="participants_${CSS.escape(date)}[]"]:checked`)).map(el => el.value).join('・');
+                        const startTime = document.getElementById(`start_time_${date}`).value;
+                        const endTime = document.getElementById(`end_time_${date}`).value;
+                        const location = document.getElementById(`location_${date}`).value;
+                        const customLocation = document.getElementById(`custom_location_${date}`).value;
+
+                        // 確認メッセージに編集後の情報を追加
+                        confirmationMessage += `日付: ${date}\n予定: ${customPlan || planType}\n参加者: ${participants}\n時間: ${startTime} ～ ${endTime}\n場所: ${customLocation || location}\n\n`;
+                    }
+                });
+
+                // 確認ダイアログを表示し、キャンセルされた場合はcancelEditingを呼び出す
+                if (!confirm(confirmationMessage)) {
+                    cancelEditing();  // キャンセルボタンが押されたらcancelEditing関数を呼び出す
+                    return false;
+                }
+                return true;
+
+            } else if (actionType === 'add') {
+                // 追加する内容を取得
+                const date = document.getElementById('date').value;
+                const planType = document.getElementById('plan_type').value;
+                const customPlan = document.getElementById('custom_plan_type').value;
+                const participants = Array.from(document.querySelectorAll('input[name="participants[]"]:checked')).map(el => el.value).join('・');
+                const startTime = document.getElementById('start_time').value;
+                const endTime = document.getElementById('end_time').value;
+                const location = document.getElementById('location').value;
+                const customLocation = document.getElementById('custom_location').value;
+
+                // 確認メッセージを作成
+                const confirmationMessage = `新しいスケジュールを追加しますか？\n\n日付: ${date}\n予定: ${customPlan || planType}\n参加者: ${participants}\n時間: ${startTime} ～ ${endTime}\n場所: ${customLocation || location}`;
+
+                // 確認ダイアログを表示し、キャンセルされた場合はcancelAddingを呼び出す
+                if (!confirm(confirmationMessage)) {
+                    cancelAdding();  // キャンセルボタンが押されたらcancelAdding関数を呼び出す
+                    return false;
+                }
+                return true;
+
+            } else if (actionType === 'logout') {
+                return confirm("ログアウトしますか？");
+            }
+            return false;
         }
 
         function toggleCustomPlanTypeInput(date, index) {
@@ -166,13 +303,8 @@
                 selectElement = document.getElementById('plan_type_' + date);
                 customInputElement = document.getElementById('custom_plan_type_' + date);
             }
-            if (selectElement.value === 'その他') {
-                customInputElement.style.display = 'inline';
-                customInputElement.disabled = false;
-            } else {
-                customInputElement.style.display = 'none';
-                customInputElement.disabled = true;
-            }
+            customInputElement.style.display = (selectElement.value === 'その他') ? 'inline' : 'none';
+            customInputElement.disabled = (selectElement.value !== 'その他');
         }
 
         function toggleCustomLocationInput(date, index) {
@@ -184,38 +316,49 @@
                 selectElement = document.getElementById('location_' + date);
                 customInputElement = document.getElementById('custom_location_' + date);
             }
-            if (selectElement.value === 'その他') {
-                customInputElement.style.display = 'inline';
-                customInputElement.disabled = false;
+            customInputElement.style.display = (selectElement.value === 'その他') ? 'inline' : 'none';
+            customInputElement.disabled = (selectElement.value !== 'その他');
+        }
+
+        function toggleCustomPlanTypeInput(date, index) {
+            let selectElement, customInputElement;
+            if (index) {
+                selectElement = document.getElementById('plan_type_' + date + '_' + index);
+                customInputElement = document.getElementById('custom_plan_type_' + date + '_' + index);
             } else {
-                customInputElement.style.display = 'none';
+                selectElement = document.getElementById('plan_type_' + date);
+                customInputElement = document.getElementById('custom_plan_type_' + date);
+            }
+            customInputElement.style.display = (selectElement.value === 'その他') ? 'inline' : 'none';
+
+            // セレクトボックスが有効な場合のみ、カスタム入力欄を有効化
+            if (!selectElement.disabled) {
+                customInputElement.disabled = (selectElement.value !== 'その他');
+            } else {
                 customInputElement.disabled = true;
             }
         }
 
-        function toggleCustomPlanTypeInputNew() {
-            const planTypeElement = document.getElementById('plan_type');
-            const customPlanTypeElement = document.getElementById('custom_plan_type');
-            if (planTypeElement.value === 'その他') {
-                customPlanTypeElement.style.display = 'inline';
-                customPlanTypeElement.disabled = false;
-            } else {
-                customPlanTypeElement.style.display = 'none';
-                customPlanTypeElement.disabled = true;
-            }
-        }
 
-        function toggleCustomLocationInputNew() {
-            const selectElement = document.getElementById('location');
-            const customInputElement = document.getElementById('custom_location');
-            if (selectElement.value === 'その他') {
-                customInputElement.style.display = 'inline';
-                customInputElement.disabled = false;
+        function toggleCustomLocationInput(date, index) {
+            let selectElement, customInputElement;
+            if (index) {
+                selectElement = document.getElementById('location_' + date + '_' + index);
+                customInputElement = document.getElementById('custom_location_' + date + '_' + index);
             } else {
-                customInputElement.style.display = 'none';
+                selectElement = document.getElementById('location_' + date);
+                customInputElement = document.getElementById('custom_location_' + date);
+            }
+            customInputElement.style.display = (selectElement.value === 'その他') ? 'inline' : 'none';
+            
+            // セレクトボックスが有効な場合のみ、カスタム入力欄を有効化
+            if (!selectElement.disabled) {
+                customInputElement.disabled = (selectElement.value !== 'その他');
+            } else {
                 customInputElement.disabled = true;
             }
         }
+
 
         // 追加フォームのリセット機能
         function cancelAdding() {
@@ -227,13 +370,75 @@
             document.getElementById('custom_location').disabled = true;
         }
 
+        // スクロールボタンにアテンションを引く関数
+        function addAttentionToScrollButtons() {
+            const scrollTopBtn = document.querySelector('.scroll-top');
+            const scrollBottomBtn = document.querySelector('.scroll-bottom');
+            scrollTopBtn.classList.add('attention');
+            scrollBottomBtn.classList.add('attention');
+        }
+
+        // スクロールボタンからアテンションを除去する関数
+        function removeAttentionFromScrollButtons() {
+            const scrollTopBtn = document.querySelector('.scroll-top');
+            const scrollBottomBtn = document.querySelector('.scroll-bottom');
+            scrollTopBtn.classList.remove('attention');
+            scrollBottomBtn.classList.remove('attention');
+        }
+
         function scrollToBottom() {
-            // この関数内の修正は不要
+            const checkedCheckboxes = document.querySelectorAll('input[name="dates"]:checked');
+            if (checkedCheckboxes.length > 0) {
+                // 編集ボタンが含まれるコンテナにスクロール
+                const editContainer = document.querySelector('.action-buttons');
+                if (editContainer) {
+                    const containerPosition = editContainer.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 2) + (editContainer.offsetHeight / 2);
+                    window.scrollTo({ top: containerPosition, behavior: 'smooth' });
+                }
+            } else {
+                // 通常の最下部にスクロール
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }
+
+            // 視覚的なフィードバック
+            const scrollBottomBtn = document.querySelector('.scroll-bottom');
+            scrollBottomBtn.classList.add('clicked');
+            setTimeout(() => {
+                scrollBottomBtn.classList.remove('clicked');
+            }, 200);
+
+            // アテンションを削除
+            removeAttentionFromScrollButtons();
         }
 
         function scrollToTop() {
-            // この関数内の修正は不要
+            const checkedCheckboxes = document.querySelectorAll('input[name="dates"]:checked');
+            if (checkedCheckboxes.length > 0) {
+                // 一番上のチェックされた予定にスクロール
+                const firstChecked = checkedCheckboxes[0];
+                const targetPosition = firstChecked.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 2);
+                window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+            } else {
+                // 通常の最上部にスクロール
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            // 視覚的なフィードバック
+            const scrollTopBtn = document.querySelector('.scroll-top');
+            scrollTopBtn.classList.add('clicked');
+            setTimeout(() => {
+                scrollTopBtn.classList.remove('clicked');
+            }, 200);
+
+            // アテンションを削除
+            removeAttentionFromScrollButtons();
         }
+
+        // ページ読み込み時にアニメーションを開始し、3秒後に停止
+        window.addEventListener('load', function() {
+            addAttentionToScrollButtons();
+            setTimeout(removeAttentionFromScrollButtons, 3000);
+        });
     </script>
 </head>
 <body>
@@ -316,7 +521,7 @@
                                 <div id="participants_edit_{{ date }}_{{ loop.index }}" style="display: none;">
                                     {% for participant in participants_names %}
                                         <label class="participant-checkbox">
-                                            <input type="checkbox" name="participants_{{ date }}_{{ loop.index }}" value="{{ participant }}" {% if participant in plan.participants %}checked{% endif %}>
+                                            <input type="checkbox" name="participants_{{ date }}_{{ loop.index }}[]" value="{{ participant }}" {% if participant in plan.participants %}checked{% endif %} disabled>
                                             {{ participant }}
                                         </label>
                                     {% endfor %}
@@ -328,9 +533,9 @@
                                     {{ plan.start_time }} ～ {{ plan.end_time }}
                                 </div>
                                 <div id="time_edit_{{ date }}_{{ loop.index }}" style="display: none;">
-                                    <input type="time" id="start_time_{{ date }}_{{ loop.index }}" name="start_time_{{ date }}_{{ loop.index }}" value="{{ plan.start_time }}" disabled>
+                                    <input type="time" id="start_time_{{ date }}_{{ loop.index }}" name="start_time_{{ date }}_{{ loop.index }}" value="{{ plan.start_time }}" disabled data-original-value="{{ plan.start_time }}">
                                     <span>～</span>
-                                    <input type="time" id="end_time_{{ date }}_{{ loop.index }}" name="end_time_{{ date }}_{{ loop.index }}" value="{{ plan.end_time }}" disabled>
+                                    <input type="time" id="end_time_{{ date }}_{{ loop.index }}" name="end_time_{{ date }}_{{ loop.index }}" value="{{ plan.end_time }}" disabled data-original-value="{{ plan.end_time }}">
                                 </div>
                             </div>
                             <div class="schedule-item">
@@ -372,7 +577,7 @@
                                 <div id="participants_edit_{{ date }}" style="display: none;">
                                     {% for participant in participants_names %}
                                         <label class="participant-checkbox">
-                                            <input type="checkbox" name="participants_{{ date }}" value="{{ participant }}" {% if participant in details.participants %}checked{% endif %}>
+                                            <input type="checkbox" name="participants_{{ date }}[]" value="{{ participant }}" {% if participant in details.participants %}checked{% endif %} disabled>
                                             {{ participant }}
                                         </label>
                                     {% endfor %}
@@ -384,9 +589,9 @@
                                     {{ details.start_time }} ～ {{ details.end_time }}
                                 </div>
                                 <div id="time_edit_{{ date }}" style="display: none;">
-                                    <input type="time" id="start_time_{{ date }}" name="start_time_{{ date }}" value="{{ details.start_time }}" disabled>
+                                    <input type="time" id="start_time_{{ date }}" name="start_time_{{ date }}" value="{{ details.start_time }}" disabled data-original-value="{{ details.start_time }}">
                                     <span>～</span>
-                                    <input type="time" id="end_time_{{ date }}" name="end_time_{{ date }}" value="{{ details.end_time }}" disabled>
+                                    <input type="time" id="end_time_{{ date }}" name="end_time_{{ date }}" value="{{ details.end_time }}" disabled data-original-value="{{ details.end_time }}">
                                 </div>
                             </div>
                             <div class="schedule-item">
@@ -437,7 +642,7 @@
                 <div>
                     {% for participant in participants_names %}
                         <label class="participant-checkbox">
-                            <input type="checkbox" name="participants" value="{{ participant }}"> {{ participant }}
+                            <input type="checkbox" name="participants[]" value="{{ participant }}"> {{ participant }}
                         </label>
                     {% endfor %}
                 </div>
