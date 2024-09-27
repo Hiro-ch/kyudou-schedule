@@ -140,6 +140,12 @@ h1, h2 {
     font-weight: bold;
 }
 
+/* 予定の境目を強調 */
+.schedule-separator {
+    border-bottom: 2px dashed #85cbdb; /* 点線で区切りを作る */
+    margin: 15px 0; /* 区切りの上下に余白を追加 */
+}
+
 /* 「場所」のラベルに対するスタイルを追加 */
 .form-group label[for="location"] {
     font-weight: bold; /* 「場所」の文字を太字にする */
