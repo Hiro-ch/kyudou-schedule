@@ -267,56 +267,118 @@
                     <input type="checkbox" name="dates" value="{{ date }}">
                     <strong>{{ date }} ({{ date | next_weekday }})</strong>
                     <div class="schedule-detail">
-                        <div class="schedule-item">
-                            <label for="plan_type_{{ date }}">予定:</label>
-                            <select id="plan_type_{{ date }}" name="plan_type_{{ date }}" onchange="toggleCustomPlanTypeInput('{{ date }}')" disabled data-original-value="{{ details.plan_type }}">
-                                <option value="全体練習" {% if details.plan_type == "全体練習" %}selected{% endif %}>全体練習</option>
-                                <option value="個人練習" {% if details.plan_type == "個人練習" %}selected{% endif %}>個人練習</option>
-                                <option value="クラブ調整会議" {% if details.plan_type == "クラブ調整会議" %}selected{% endif %}>クラブ調整会議</option>
-                                <option value="その他" {% if details.plan_type not in ["全体練習", "個人練習", "クラブ調整会議"] %}selected{% endif %}>その他</option>
-                            </select>
-                            <input type="text" id="custom_plan_type_{{ date }}" name="custom_plan_type_{{ date }}" value="{{ details.plan_type if details.plan_type not in ['全体練習', '個人練習', 'クラブ調整会議'] else '' }}" {% if details.plan_type in ["全体練習", "個人練習", "クラブ調整会議"] %}style="display:none;"{% endif %} disabled data-original-value="{{ details.plan_type if details.plan_type not in ['全体練習', '個人練習', 'クラブ調整会議'] else '' }}" placeholder="予定を入力">
-                        </div>
-                        <div class="schedule-item">
-                            <label>参加者:</label>
-                            <div id="participants_display_{{ date }}">
-                                <!-- 参加者を「・」でつないで表示 -->
-                                {{ details.participants | join('・') }}
+            
+                        {% if details.plans %}
+                            <!-- 複数の予定がある場合、それぞれの予定を表示 -->
+                            {% for plan in details.plans %}
+                            <div class="schedule-item">
+                                <label for="plan_type_{{ date }}">予定:</label>
+                                <select id="plan_type_{{ date }}" name="plan_type_{{ date }}" onchange="toggleCustomPlanTypeInput('{{ date }}')" disabled data-original-value="{{ plan.plan_type }}">
+                                    <option value="全体練習" {% if plan.plan_type == "全体練習" %}selected{% endif %}>全体練習</option>
+                                    <option value="個人練習" {% if plan.plan_type == "個人練習" %}selected{% endif %}>個人練習</option>
+                                    <option value="クラブ調整会議" {% if plan.plan_type == "クラブ調整会議" %}selected{% endif %}>クラブ調整会議</option>
+                                    <option value="その他" {% if plan.plan_type not in ["全体練習", "個人練習", "クラブ調整会議"] %}selected{% endif %}>その他</option>
+                                </select>
+                                <input type="text" id="custom_plan_type_{{ date }}" name="custom_plan_type_{{ date }}" value="{{ plan.plan_type if plan.plan_type not in ['全体練習', '個人練習', 'クラブ調整会議'] else '' }}" {% if plan.plan_type in ["全体練習", "個人練習", "クラブ調整会議"] %}style="display:none;"{% endif %} disabled data-original-value="{{ plan.plan_type if plan.plan_type not in ['全体練習', '個人練習', 'クラブ調整会議'] else '' }}" placeholder="予定を入力">
                             </div>
-                            <div id="participants_edit_{{ date }}" style="display: none;">
-                                {% for participant in participants_names %}
-                                    <label class="participant-checkbox">
-                                        <input type="checkbox" name="participants_{{ date }}" value="{{ participant }}" {% if participant in details.participants %}checked{% endif %}>
-                                        {{ participant }}
-                                    </label>
-                                {% endfor %}
+                            <div class="schedule-item">
+                                <label>参加者:</label>
+                                <div id="participants_display_{{ date }}">
+                                    <!-- 参加者を「・」でつないで表示 -->
+                                    {{ plan.participants | join('・') }}
+                                </div>
+                                <div id="participants_edit_{{ date }}" style="display: none;">
+                                    {% for participant in participants_names %}
+                                        <label class="participant-checkbox">
+                                            <input type="checkbox" name="participants_{{ date }}" value="{{ participant }}" {% if participant in plan.participants %}checked{% endif %}>
+                                            {{ participant }}
+                                        </label>
+                                    {% endfor %}
+                                </div>
                             </div>
-                        </div>
-                        <div class="schedule-item">
-                            <label>時間:</label>
-                            <div id="time_display_{{ date }}">
-                                {{ details.start_time }} ～ {{ details.end_time }}
+                            <div class="schedule-item">
+                                <label>時間:</label>
+                                <div id="time_display_{{ date }}">
+                                    {{ plan.start_time }} ～ {{ plan.end_time }}
+                                </div>
+                                <div id="time_edit_{{ date }}" style="display: none;">
+                                    <input type="time" id="start_time_{{ date }}" name="start_time_{{ date }}" value="{{ plan.start_time }}" disabled>
+                                    <span>～</span>
+                                    <input type="time" id="end_time_{{ date }}" name="end_time_{{ date }}" value="{{ plan.end_time }}" disabled>
+                                </div>
                             </div>
-                            <div id="time_edit_{{ date }}" style="display: none;">
-                                <input type="time" id="start_time_{{ date }}" name="start_time_{{ date }}" value="{{ details.start_time }}" disabled>
-                                <span>～</span>
-                                <input type="time" id="end_time_{{ date }}" name="end_time_{{ date }}" value="{{ details.end_time }}" disabled>
+                            <div class="schedule-item">
+                                <label for="location_{{ date }}">場所:</label>
+                                <select id="location_{{ date }}" name="location_{{ date }}" onchange="toggleCustomLocationInput('{{ date }}')" disabled>
+                                    <option value="広島市立大学" {% if plan.location == "広島市立大学" %}selected{% endif %}>広島市立大学</option>
+                                    <option value="安佐南区スポーツセンター" {% if plan.location == "安佐南区スポーツセンター" %}selected{% endif %}>安佐南区スポーツセンター</option>
+                                    <option value="県立総合体育館" {% if plan.location == "県立総合体育館" %}selected{% endif %}>県立総合体育館</option>
+                                    <option value="その他" {% if plan.location not in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}selected{% endif %}>その他</option>
+                                </select>
+                                <input type="text" id="custom_location_{{ date }}" name="custom_location_{{ date }}" value="{{ plan.location if plan.location not in ['広島市立大学', '安佐南区スポーツセンター', '県立総合体育館'] else '' }}" {% if plan.location in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}style="display:none;"{% endif %} placeholder="場所を入力" disabled>
                             </div>
-                        </div>
-                        <div class="schedule-item">
-                            <label for="location_{{ date }}">場所:</label>
-                            <select id="location_{{ date }}" name="location_{{ date }}" onchange="toggleCustomLocationInput('{{ date }}')" disabled>
-                                <option value="広島市立大学" {% if details.location == "広島市立大学" %}selected{% endif %}>広島市立大学</option>
-                                <option value="安佐南区スポーツセンター" {% if details.location == "安佐南区スポーツセンター" %}selected{% endif %}>安佐南区スポーツセンター</option>
-                                <option value="県立総合体育館" {% if details.location == "県立総合体育館" %}selected{% endif %}>県立総合体育館</option>
-                                <option value="その他" {% if details.location not in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}selected{% endif %}>その他</option>
-                            </select>
-                            <input type="text" id="custom_location_{{ date }}" name="custom_location_{{ date }}" value="{{ details.location if details.location not in ['広島市立大学', '安佐南区スポーツセンター', '県立総合体育館'] else '' }}" {% if details.location in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}style="display:none;"{% endif %} placeholder="場所を入力" disabled>
-                        </div>
-                        {% if details.last_updated %}
-                        <div class="last-updated">
-                            最後に更新された日時: {{ details.last_updated }}
-                        </div>
+                            {% if plan.last_updated %}
+                            <div class="last-updated">
+                                最後に更新された日時: {{ plan.last_updated }}
+                            </div>
+                            {% endif %}
+                            <!-- 予定間に区切りを追加 (最後の予定には区切り線を追加しない) -->
+                            {% if not loop.last %}
+                            <div class="schedule-separator"></div>
+                            {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <!-- 予定が1つしかない場合の表示 -->
+                            <div class="schedule-item">
+                                <label for="plan_type_{{ date }}">予定:</label>
+                                <select id="plan_type_{{ date }}" name="plan_type_{{ date }}" onchange="toggleCustomPlanTypeInput('{{ date }}')" disabled data-original-value="{{ details.plan_type }}">
+                                    <option value="全体練習" {% if details.plan_type == "全体練習" %}selected{% endif %}>全体練習</option>
+                                    <option value="個人練習" {% if details.plan_type == "個人練習" %}selected{% endif %}>個人練習</option>
+                                    <option value="クラブ調整会議" {% if details.plan_type == "クラブ調整会議" %}selected{% endif %}>クラブ調整会議</option>
+                                    <option value="その他" {% if details.plan_type not in ["全体練習", "個人練習", "クラブ調整会議"] %}selected{% endif %}>その他</option>
+                                </select>
+                                <input type="text" id="custom_plan_type_{{ date }}" name="custom_plan_type_{{ date }}" value="{{ details.plan_type if details.plan_type not in ['全体練習', '個人練習', 'クラブ調整会議'] else '' }}" {% if details.plan_type in ["全体練習", "個人練習", "クラブ調整会議"] %}style="display:none;"{% endif %} disabled data-original-value="{{ details.plan_type if details.plan_type not in ['全体練習', '個人練習', 'クラブ調整会議'] else '' }}" placeholder="予定を入力">
+                            </div>
+                            <div class="schedule-item">
+                                <label>参加者:</label>
+                                <div id="participants_display_{{ date }}">
+                                    {{ details.participants | join('・') }}
+                                </div>
+                                <div id="participants_edit_{{ date }}" style="display: none;">
+                                    {% for participant in participants_names %}
+                                        <label class="participant-checkbox">
+                                            <input type="checkbox" name="participants_{{ date }}" value="{{ participant }}" {% if participant in details.participants %}checked{% endif %}>
+                                            {{ participant }}
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="schedule-item">
+                                <label>時間:</label>
+                                <div id="time_display_{{ date }}">
+                                    {{ details.start_time }} ～ {{ details.end_time }}
+                                </div>
+                                <div id="time_edit_{{ date }}" style="display: none;">
+                                    <input type="time" id="start_time_{{ date }}" name="start_time_{{ date }}" value="{{ details.start_time }}" disabled>
+                                    <span>～</span>
+                                    <input type="time" id="end_time_{{ date }}" name="end_time_{{ date }}" value="{{ details.end_time }}" disabled>
+                                </div>
+                            </div>
+                            <div class="schedule-item">
+                                <label for="location_{{ date }}">場所:</label>
+                                <select id="location_{{ date }}" name="location_{{ date }}" onchange="toggleCustomLocationInput('{{ date }}')" disabled>
+                                    <option value="広島市立大学" {% if details.location == "広島市立大学" %}selected{% endif %}>広島市立大学</option>
+                                    <option value="安佐南区スポーツセンター" {% if details.location == "安佐南区スポーツセンター" %}selected{% endif %}>安佐南区スポーツセンター</option>
+                                    <option value="県立総合体育館" {% if details.location == "県立総合体育館" %}selected{% endif %}>県立総合体育館</option>
+                                    <option value="その他" {% if details.location not in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}selected{% endif %}>その他</option>
+                                </select>
+                                <input type="text" id="custom_location_{{ date }}" name="custom_location_{{ date }}" value="{{ details.location if details.location not in ['広島市立大学', '安佐南区スポーツセンター', '県立総合体育館'] else '' }}" {% if details.location in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}style="display:none;"{% endif %} placeholder="場所を入力" disabled>
+                            </div>
+                            {% if details.last_updated %}
+                            <div class="last-updated">
+                                最後に更新された日時: {{ details.last_updated }}
+                            </div>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </li>
