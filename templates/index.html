@@ -361,7 +361,8 @@
                                 <label for="location_{{ date }}_{{ loop.index }}">場所:</label>
                                 <select id="location_{{ date }}_{{ loop.index }}" name="location_{{ date }}_{{ loop.index }}" onchange="toggleCustomLocationInput('{{ date }}', '{{ loop.index }}')" disabled>
                                     <option value="広島市立大学" {% if plan.location == "広島市立大学" %}selected{% endif %}>広島市立大学</option>
-                                    <option value="その他" {% if plan.location not in ["広島市立大学"] %}selected{% endif %}>その他</option>
+                                    <option value="県立総合体育館弓道場" {% if plan.location == "県立総合体育館弓道場" %}selected{% endif %}>県立総合体育館弓道場</option>
+                                    <option value="その他" {% if plan.location not in ["広島市立大学", "県立総合体育館弓道場"] %}selected{% endif %}>その他</option>
                                 </select>
                             </div>
                             {% if plan.last_updated %}
@@ -415,7 +416,8 @@
                                 <label for="location_{{ date }}">場所:</label>
                                 <select id="location_{{ date }}" name="location_{{ date }}" onchange="toggleCustomLocationInput('{{ date }}')" disabled>
                                     <option value="広島市立大学" {% if details.location == "広島市立大学" %}selected{% endif %}>広島市立大学</option>
-                                    <option value="その他" {% if details.location not in ["広島市立大学"] %}selected{% endif %}>その他</option>
+                                    <option value="県立総合体育館弓道場" {% if plan.location == "県立総合体育館弓道場" %}selected{% endif %}>県立総合体育館弓道場</option>
+                                    <option value="その他" {% if details.location not in ["広島市立大学", "県立総合体育館弓道場"] %}selected{% endif %}>その他</option>
                                 </select>
                             </div>
                             {% if details.last_updated %}
