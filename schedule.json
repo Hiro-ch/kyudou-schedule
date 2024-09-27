@@ -1,32 +1,44 @@
 {
     "10/17": {
-        "plan_type": "クラブ調整会議",
-        "participants": [
-            "山﨑大"
-        ],
-        "start_time": "12:20",
-        "end_time": "12:50",
-        "location": "講堂小ホール",
-        "last_updated": null
+        "plans": [
+            {
+                "plan_type": "クラブ調整会議",
+                "participants": [
+                    "山﨑大"
+                ],
+                "start_time": "12:20",
+                "end_time": "12:50",
+                "location": "講堂小ホール",
+                "last_updated": null
+            }
+        ]
     },
     "11/28": {
-        "plan_type": "クラブ調整会議",
-        "participants": [
-            "山﨑大"
-        ],
-        "start_time": "12:20",
-        "end_time": "12:50",
-        "location": "講堂小ホール",
-        "last_updated": null
+        "plans": [
+            {
+                "plan_type": "クラブ調整会議",
+                "participants": [
+                    "山﨑大"
+                ],
+                "start_time": "12:20",
+                "end_time": "12:50",
+                "location": "講堂小ホール",
+                "last_updated": null
+            }
+        ]
     },
     "12/19": {
-        "plan_type": "クラブ調整会議",
-        "participants": [
-            "山﨑大"
-        ],
-        "start_time": "12:20",
-        "end_time": "12:50",
-        "location": "講堂小ホール",
-        "last_updated": null
+        "plans": [
+            {
+                "plan_type": "クラブ調整会議",
+                "participants": [
+                    "山﨑大"
+                ],
+                "start_time": "12:20",
+                "end_time": "12:50",
+                "location": "講堂小ホール",
+                "last_updated": null
+            }
+        ]
     }
 }
