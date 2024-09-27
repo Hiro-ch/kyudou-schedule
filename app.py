@@ -398,16 +398,18 @@ def filter():
             # 全員が選ばれた場合、予定が「全体練習」のスケジュールを表示
             filtered_schedule = {
                 date: details for date, details in schedule_dict.items()
-                if details.get('plan_type') == "全体練習"  # 予定が「全体練習」かを判定
+                if any(plan['plan_type'] == "全体練習" for plan in details.get('plans', []))  # 予定が「全体練習」かを判定
             }
         else:
             # 一部の部員が選択された場合、選択された部員が参加しているか、全体練習が含まれるスケジュールを表示
             filtered_schedule = {
                 date: details for date, details in schedule_dict.items()
-                if all(participant in details['participants'] for participant in selected_participants) or details.get('plan_type') == "全体練習"
+                if any(all(participant in plan.get('participants', []) for participant in selected_participants) or plan['plan_type'] == "全体練習"
+                       for plan in details.get('plans', []))
             }
 
     return render_template('index.html', schedule=filtered_schedule, participants_names=PARTICIPANTS_NAMES, user=current_user)
+
 
 
 if __name__ == '__main__':
