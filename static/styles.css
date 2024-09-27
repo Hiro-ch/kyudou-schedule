@@ -142,7 +142,7 @@ h1, h2 {
 
 /* 予定の境目を強調 */
 .schedule-separator {
-    border-bottom: 2px dashed #85cbdb; /* 点線で区切りを作る */
+    border-bottom: 2px dashed #008cba; /* 点線で区切りを作る */
     margin: 15px 0; /* 区切りの上下に余白を追加 */
 }
 
@@ -274,7 +274,7 @@ input[readonly], input:disabled, select:disabled {
 
 /* 下へボタンのスタイル */
 .scroll-bottom {
-    background-color: #008CBA; /* 青色 */
+    background-color: #008cba; /* 青色 */
     color: white;
     padding: 10px;
     border: none;
