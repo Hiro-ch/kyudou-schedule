@@ -92,8 +92,26 @@ def load_schedule():
 
 # スケジュールをJSONファイルに保存する
 def save_schedule(schedule_dict):
+    # 全ての予定が"plans"リストに格納されていることを確認して保存
+    for date, details in schedule_dict.items():
+        # detailsが辞書であり、'plans'キーが存在しない場合はplansを作成する
+        if 'plans' not in details:
+            # 既存のルートレベルの情報を"plans"リストに移動
+            schedule_dict[date] = {
+                "plans": [{
+                    "plan_type": details.get('plan_type'),
+                    "participants": details.get('participants', []),
+                    "start_time": details.get('start_time'),
+                    "end_time": details.get('end_time'),
+                    "location": details.get('location'),
+                    "last_updated": details.get('last_updated')
+                }]
+            }
+
+    # JSONファイルに保存
     with open('schedule.json', 'w', encoding='utf-8') as f:
         json.dump(schedule_dict, f, ensure_ascii=False, indent=4)
+
 
 # 練習スケジュールを読み込み
 schedule_dict = load_schedule()
@@ -211,12 +229,15 @@ def add():
     jst = pytz.timezone('Asia/Tokyo')
     now = datetime.datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
 
+    # 修正: 既存の予定に新しい予定を追加する際にplansリストを使用
     if date in schedule_dict:
         existing_plans = schedule_dict[date].get('plans', [])
+        # 同じ種類の予定が既に存在するかをチェック
         if any(plan['plan_type'] == plan_type for plan in existing_plans):
             flash(f"追加しようとしている日は同じ予定がすでにあります: {date}")
             return redirect(url_for('index'))
         else:
+            # 新しい予定をplansリストに追加
             existing_plans.append({
                 "plan_type": plan_type,
                 "participants": [p.strip() for p in participants],
@@ -227,6 +248,7 @@ def add():
             })
             schedule_dict[date]['plans'] = existing_plans
     else:
+        # 新しい日付の場合は新しいplansリストを作成
         schedule_dict[date] = {
             "plans": [{
                 "plan_type": plan_type,
@@ -238,6 +260,7 @@ def add():
             }]
         }
 
+    # 日付でスケジュールをソートして保存
     def parse_date(date_str):
         return datetime.datetime.strptime(date_str, '%m/%d')
 
@@ -257,6 +280,7 @@ def add():
 
     flash("新しいスケジュールが追加されました。")
     return redirect(url_for('index'))
+
 
 @app.route('/manage', methods=['POST'])
 @login_required
