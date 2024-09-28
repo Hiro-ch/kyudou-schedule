@@ -55,13 +55,30 @@
                 // カスタム「予定」を無効化
                 customPlanTypeElement.disabled = true;
 
+                // **場所のセレクトボックスとカスタム入力欄を元の値に戻す**
+                const locationElement = document.getElementById('location_' + date);
+                const customLocationElement = document.getElementById('custom_location_' + date);
+
+                // data-original-valueに保存された初期値を元に戻す
+                locationElement.value = locationElement.getAttribute('data-original-value');
+                customLocationElement.value = customLocationElement.getAttribute('data-original-value');
+
+                // カスタム入力欄の表示状態を元に戻す
+                toggleCustomLocationInput(date);
+                
+                // 「予定」のドロップダウンとカスタム入力欄を無効化
+                planTypeElement.disabled = true;
+                customPlanTypeElement.disabled = true;
+
+                // カスタム「場所」を無効化
+                customLocationElement.disabled = true;
+                locationElement.disabled = true;
+
                 // 他の項目を元に戻す
-                document.getElementById('plan_type_' + date).disabled = true;
                 document.getElementById('participants_display_' + date).style.display = 'block';
                 document.getElementById('participants_edit_' + date).style.display = 'none';
                 document.getElementById('start_time_' + date).disabled = true;
                 document.getElementById('end_time_' + date).disabled = true;
-                document.getElementById('location_' + date).disabled = true;
                 document.getElementById('time_display_' + date).style.display = 'block';
                 document.getElementById('time_edit_' + date).style.display = 'none';
             });
@@ -319,15 +336,16 @@
                                 <input type="time" id="end_time_{{ date }}" name="end_time_{{ date }}" value="{{ details.end_time }}" disabled>
                             </div>
                         </div>
+                        <!-- 場所のセレクトボックスとカスタム入力欄 -->
                         <div class="schedule-item">
                             <label for="location_{{ date }}">場所:</label>
-                            <select id="location_{{ date }}" name="location_{{ date }}" onchange="toggleCustomLocationInput('{{ date }}')" disabled>
+                            <select id="location_{{ date }}" name="location_{{ date }}" onchange="toggleCustomLocationInput('{{ date }}')" disabled data-original-value="{% if details.location in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}{{ details.location }}{% else %}その他{% endif %}">
                                 <option value="広島市立大学" {% if details.location == "広島市立大学" %}selected{% endif %}>広島市立大学</option>
                                 <option value="安佐南区スポーツセンター" {% if details.location == "安佐南区スポーツセンター" %}selected{% endif %}>安佐南区スポーツセンター</option>
                                 <option value="県立総合体育館" {% if details.location == "県立総合体育館" %}selected{% endif %}>県立総合体育館</option>
                                 <option value="その他" {% if details.location not in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}selected{% endif %}>その他</option>
                             </select>
-                            <input type="text" id="custom_location_{{ date }}" name="custom_location_{{ date }}" value="{{ details.location if details.location not in ['広島市立大学', '安佐南区スポーツセンター', '県立総合体育館'] else '' }}" {% if details.location in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}style="display:none;"{% endif %} placeholder="場所を入力" disabled>
+                            <input type="text" id="custom_location_{{ date }}" name="custom_location_{{ date }}" value="{% if details.location not in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}{{ details.location }}{% else %}{% endif %}" {% if details.location in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}style="display:none;"{% endif %} placeholder="場所を入力" disabled data-original-value="{% if details.location not in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}{{ details.location }}{% else %}{% endif %}">
                         </div>
                         {% if details.last_updated %}
                         <div class="last-updated">
