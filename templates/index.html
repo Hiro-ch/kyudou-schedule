@@ -208,6 +208,22 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
+        // 追加するJavaScriptコード
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateCheckboxes = document.querySelectorAll('input[name="dates"]');
+            const scrollButtons = document.querySelectorAll('.scroll-btn');
+
+            dateCheckboxes.forEach(function(checkbox) {
+                checkbox.addEventListener('change', function() {
+                    const anyChecked = Array.from(dateCheckboxes).some(cb => cb.checked);
+                    if (anyChecked) {
+                        scrollButtons.forEach(btn => btn.classList.add('highlight'));
+                    } else {
+                        scrollButtons.forEach(btn => btn.classList.remove('highlight'));
+                    }
+                });
+            });
+        });
     </script>
 </head>
 <body>
