@@ -217,7 +217,7 @@ def add():
     if plan_type == "その他" and custom_plan_type:
         plan_type = custom_plan_type
 
-    participants = request.form.getlist('participants')
+    participants = request.form.getlist('participants[]')
     start_time = request.form['start_time']
     end_time = request.form['end_time']
     location = request.form['location']
@@ -299,19 +299,58 @@ def manage():
         for date in selected_dates:
             original = schedule_dict.get(date, {})
 
-            # 各予定をループし、個別に編集
-            for i, plan in enumerate(original.get('plans', [])):
-                plan_type = request.form.get(f'plan_type_{date}_{i+1}')
-                custom_plan_type = request.form.get(f'custom_plan_type_{date}_{i+1}')
+            # 'plans' キーが存在するか確認
+            if 'plans' in original:
+                # 複数の予定がある場合
+                for i, plan in enumerate(original['plans']):
+                    plan_type = request.form.get(f'plan_type_{date}_{i+1}')
+                    custom_plan_type = request.form.get(f'custom_plan_type_{date}_{i+1}')
+
+                    if plan_type == "その他" and custom_plan_type:
+                        plan_type = custom_plan_type
+
+                    participants = request.form.getlist(f'participants_{date}_{i+1}')
+                    start_time = request.form.get(f'start_time_{date}_{i+1}')
+                    end_time = request.form.get(f'end_time_{date}_{i+1}')
+                    location = request.form.get(f'location_{date}_{i+1}')
+                    custom_location = request.form.get(f'custom_location_{date}_{i+1}')
+
+                    if location == "その他" and custom_location:
+                        location = custom_location
+
+                    jst = pytz.timezone('Asia/Tokyo')
+                    now = datetime.datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
+
+                    updated_plan = {
+                        "plan_type": plan_type,
+                        "participants": [p.strip() for p in participants],
+                        "start_time": start_time,
+                        "end_time": end_time,
+                        "location": location,
+                        "last_updated": now
+                    }
+
+                    # 変更があれば更新
+                    if plan != updated_plan:
+                        original['plans'][i] = updated_plan
+                        changes_made = True
+
+                if changes_made:
+                    updated_dates.append(date)
+
+            else:
+                # 単一の予定がある場合
+                plan_type = request.form.get(f'plan_type_{date}')
+                custom_plan_type = request.form.get(f'custom_plan_type_{date}')
 
                 if plan_type == "その他" and custom_plan_type:
                     plan_type = custom_plan_type
 
-                participants = request.form.getlist(f'participants_{date}_{i+1}')
-                start_time = request.form.get(f'start_time_{date}_{i+1}')
-                end_time = request.form.get(f'end_time_{date}_{i+1}')
-                location = request.form.get(f'location_{date}_{i+1}')
-                custom_location = request.form.get(f'custom_location_{date}_{i+1}')
+                participants = request.form.getlist(f'participants_{date}')
+                start_time = request.form.get(f'start_time_{date}')
+                end_time = request.form.get(f'end_time_{date}')
+                location = request.form.get(f'location_{date}')
+                custom_location = request.form.get(f'custom_location_{date}')
 
                 if location == "その他" and custom_location:
                     location = custom_location
@@ -329,12 +368,10 @@ def manage():
                 }
 
                 # 変更があれば更新
-                if plan != updated_plan:
-                    original['plans'][i] = updated_plan
+                if original != updated_plan:
+                    schedule_dict[date] = {'plans': [updated_plan]}
                     changes_made = True
-
-            if changes_made:
-                updated_dates.append(date)
+                    updated_dates.append(date)
 
         if changes_made:
             save_schedule(schedule_dict)
@@ -343,7 +380,7 @@ def manage():
             flash("変更がありません。")
 
         return redirect(url_for('index'))
-
+                
     elif action == 'delete':
         if not selected_dates:
             flash("削除する日付を選択してください。")
@@ -369,7 +406,7 @@ def manage():
         else:
             flash("選択された日付はスケジュールに存在しませんでした。")
 
-        return redirect(url_for('index'))
+        return redirect(url_for('index'))    
 
 @app.route('/filter', methods=['POST'])
 @login_required
@@ -396,8 +433,6 @@ def filter():
             }
 
     return render_template('index.html', schedule=filtered_schedule, participants_names=PARTICIPANTS_NAMES, user=current_user)
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
