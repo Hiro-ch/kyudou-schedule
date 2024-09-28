@@ -1,4 +1,3 @@
-/* styles.css */
 body {
     font-family: Arial, sans-serif;
     background-color: #f9f9f9;
@@ -141,19 +140,12 @@ h1, h2 {
     font-weight: bold;
 }
 
-/* 予定の境目を強調 */
-.schedule-separator {
-    border-bottom: 2px dashed #008cba; /* 点線で区切りを作る */
-    margin: 15px 0; /* 区切りの上下に余白を追加 */
-}
-
 /* 「場所」のラベルに対するスタイルを追加 */
 .form-group label[for="location"] {
     font-weight: bold; /* 「場所」の文字を太字にする */
     font-size: 16px; /* 必要に応じてフォントサイズを調整 */
     margin-bottom: 5px; /* ラベルと入力欄の間に余白を追加 */
 }
-
 input[type="text"], input[type="time"], select {
     padding: 5px;
     border: 1px solid #ccc;
@@ -218,7 +210,6 @@ input[readonly], input:disabled, select:disabled {
     font-size: 16px;
     width: 48%; /* フォームで使用されるボタンの幅を調整 */
 }
-
 .add-btn {
     background-color: #FFA500; /* オレンジ色 */
     color: white;
@@ -249,36 +240,6 @@ input[readonly], input:disabled, select:disabled {
     font-size: 16px;
 }
 
-.submit-btn:hover {
-    background-color: #007bb5;
-}
-
-.delete-btn:hover {
-    background-color: #d32f2f;
-}
-
-.edit-btn:hover {
-    background-color: #45a049;
-}
-
-.add-btn:hover {
-    background-color: #ff8c00;
-}
-
-.logout-btn {
-    background-color: #ff5722; /* ログアウトボタンを目立たせるためにオレンジ色を使用 */
-    color: white;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-left: 10px;
-}
-
-.logout-btn:hover {
-    background-color: #e64a19;
-}
-
 /* スクロールボタンのスタイル */
 .scroll-btn-container {
     position: fixed;
@@ -290,56 +251,34 @@ input[readonly], input:disabled, select:disabled {
     gap: 10px; /* ボタン間のスペースを追加 */
 }
 
-.scroll-btn {
-    position: fixed;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    border: none;
-    background-color: white;
-    font-size: 24px;
-    border-radius: 25px;
-    cursor: pointer;
-    color: white;
-    z-index: 1000;
-}
-
+/* 上へボタンのスタイル */
 .scroll-top {
-    bottom: 90px;
-    background-color: #ff5722;
-    --btn-color: #ff5722;
+    background-color: #FF5722; /* オレンジ色 */
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
 }
 
+.scroll-top:hover {
+    background-color: #e64a19; /* ホバー時のオレンジ色 */
+}
+
+/* 下へボタンのスタイル */
 .scroll-bottom {
-    bottom: 20px;
-    background-color: #008CBA;
-    --btn-color: #008CBA;
+    background-color: #008CBA; /* 青色 */
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
 }
 
-/* アテンションアニメーション用のスタイル */
-.attention {
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(0,0,0,0);
-    }
-    50% {
-        transform: scale(1.2);
-        box-shadow: 0 0 10px 10px var(--btn-color);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(0,0,0,0);
-    }
-}
-
-/* クリック時の視覚的なフィードバック */
-.scroll-btn.clicked {
-    transform: scale(0.9);
-    transition: transform 0.1s;
+.scroll-bottom:hover {
+    background-color: #005f75; /* ホバー時の青色 */
 }
 
 .add-form .action-buttons {
@@ -356,6 +295,36 @@ input[readonly], input:disabled, select:disabled {
 .add-form .add-btn, .add-form .cancel-btn {
     width: auto; /* ボタンの幅を自動調整 */
     margin-right: 10px; /* ボタン間のスペースを調整 */
+}
+
+.submit-btn:hover {
+    background-color: #007bb5;
+}
+
+.delete-btn:hover {
+    background-color: #d32f2f;
+}
+
+.edit-btn:hover {
+    background-color: #45a049;
+}
+
+.add-btn.hover {
+    background-color: #FF8C00;
+}
+
+.logout-btn {
+    background-color: #ff5722; /* ログアウトボタンを目立たせるためにオレンジ色を使用 */
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.logout-btn:hover {
+    background-color: #e64a19;
 }
 
 @media screen and (max-width: 600px) {

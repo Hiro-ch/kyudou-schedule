@@ -92,26 +92,8 @@ def load_schedule():
 
 # スケジュールをJSONファイルに保存する
 def save_schedule(schedule_dict):
-    # 全ての予定が"plans"リストに格納されていることを確認して保存
-    for date, details in schedule_dict.items():
-        # detailsが辞書であり、'plans'キーが存在しない場合はplansを作成する
-        if 'plans' not in details:
-            # 既存のルートレベルの情報を"plans"リストに移動
-            schedule_dict[date] = {
-                "plans": [{
-                    "plan_type": details.get('plan_type'),
-                    "participants": details.get('participants', []),
-                    "start_time": details.get('start_time'),
-                    "end_time": details.get('end_time'),
-                    "location": details.get('location'),
-                    "last_updated": details.get('last_updated')
-                }]
-            }
-
-    # JSONファイルに保存
     with open('schedule.json', 'w', encoding='utf-8') as f:
         json.dump(schedule_dict, f, ensure_ascii=False, indent=4)
-
 
 # 練習スケジュールを読み込み
 schedule_dict = load_schedule()
@@ -203,6 +185,7 @@ def add():
         flash("管理者のみがスケジュールを追加できます。")
         return redirect(url_for('index'))
 
+    # YYYY-MM-DD 形式の日付を取得
     date = request.form['date']  # 例: '2024-09-24'
     
     # OSによってフォーマットを変更
@@ -211,76 +194,66 @@ def add():
     else:
         date = datetime.datetime.strptime(date, '%Y-%m-%d').strftime('%-m/%-d')  # macOS/Linux用
 
+    # 既存のスケジュールをチェック
+    if date in schedule_dict:
+        flash(f"追加しようとしている日はすでに練習が予定されています: {date}")
+        return redirect(url_for('index'))
+
     plan_type = request.form['plan_type']
     custom_plan_type = request.form.get('custom_plan_type')
 
+    # 予定が「その他」の場合、自由入力フィールドの値を使う
     if plan_type == "その他" and custom_plan_type:
         plan_type = custom_plan_type
 
-    participants = request.form.getlist('participants[]')
+    # チェックボックスから参加者を取得
+    participants = request.form.getlist('participants')
     start_time = request.form['start_time']
     end_time = request.form['end_time']
     location = request.form['location']
     custom_location = request.form.get('custom_location')
 
+    # 「その他」が選択され、自由入力フィールドが記入されている場合、その内容を保存
     if location == "その他" and custom_location:
         location = custom_location
 
+    # 現在の日本時間を取得して記録
     jst = pytz.timezone('Asia/Tokyo')
     now = datetime.datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
 
-    # 修正: 既存の予定に新しい予定を追加する際にplansリストを使用
-    if date in schedule_dict:
-        existing_plans = schedule_dict[date].get('plans', [])
-        # 同じ種類の予定が既に存在するかをチェック
-        if any(plan['plan_type'] == plan_type for plan in existing_plans):
-            flash(f"追加しようとしている日は同じ予定がすでにあります: {date}")
-            return redirect(url_for('index'))
-        else:
-            # 新しい予定をplansリストに追加
-            existing_plans.append({
-                "plan_type": plan_type,
-                "participants": [p.strip() for p in participants],
-                "start_time": start_time,
-                "end_time": end_time,
-                "location": location,
-                "last_updated": now
-            })
-            schedule_dict[date]['plans'] = existing_plans
-    else:
-        # 新しい日付の場合は新しいplansリストを作成
-        schedule_dict[date] = {
-            "plans": [{
-                "plan_type": plan_type,
-                "participants": [p.strip() for p in participants],
-                "start_time": start_time,
-                "end_time": end_time,
-                "location": location,
-                "last_updated": now
-            }]
-        }
+    schedule_dict[date] = {
+        "plan_type": plan_type,  # 予定を保存
+        "participants": [p.strip() for p in participants],
+        "start_time": start_time,
+        "end_time": end_time,
+        "location": location,
+        "last_updated": now
+    }
 
-    # 日付でスケジュールをソートして保存
+    # 追加後にスケジュールを昇順にソート
     def parse_date(date_str):
         return datetime.datetime.strptime(date_str, '%m/%d')
 
     sorted_schedule = dict(sorted(schedule_dict.items(), key=lambda item: parse_date(item[0])))
 
+    # ソートされたスケジュールを保存
     schedule_dict.clear()
     schedule_dict.update(sorted_schedule)
+    # スケジュールを保存
     save_schedule(schedule_dict)
 
-    if "全員" in schedule_dict[date]['plans'][0]['participants']:
+    # LINE Notifyの通知内容を設定
+    if "全員" in schedule_dict[date]['participants']:
         participants_str = '全員'
     else:
-        participants_str = '・'.join(schedule_dict[date]['plans'][0]['participants']) + 'さん'
+        participants_str = '・'.join(schedule_dict[date]['participants']) + 'さん'
 
+    # 新しいスケジュールの追加を通知
     message = f"新しい練習スケジュールが追加されました。\n予定: {plan_type}\n日付: {date}\n時間: {start_time} ～ {end_time}\n場所: {location}\n参加者: {participants_str}"
     #send_line_notify(message)
 
     flash("新しいスケジュールが追加されました。")
     return redirect(url_for('index'))
-
 
 @app.route('/manage', methods=['POST'])
 @login_required
@@ -299,88 +272,64 @@ def manage():
         for date in selected_dates:
             original = schedule_dict.get(date, {})
 
-            # 'plans' キーが存在するか確認
-            if 'plans' in original:
-                # 複数の予定がある場合
-                for i, plan in enumerate(original['plans']):
-                    plan_type = request.form.get(f'plan_type_{date}_{i+1}')
-                    custom_plan_type = request.form.get(f'custom_plan_type_{date}_{i+1}')
+             # フォームから「予定」と「カスタム予定」を取得
+            plan_type = request.form.get(f'plan_type_{date}')
+            custom_plan_type = request.form.get(f'custom_plan_type_{date}')
 
-                    if plan_type == "その他" and custom_plan_type:
-                        plan_type = custom_plan_type
+            # 「予定」が「その他」の場合、自由入力された値を使用
+            if plan_type == "その他" and custom_plan_type:
+                plan_type = custom_plan_type
+                
+            # チェックボックスから選択された参加者を取得
+            participants = request.form.getlist(f'participants_{date}')
+            
+            start_time = request.form.get(f'start_time_{date}')
+            end_time = request.form.get(f'end_time_{date}')
+            location = request.form.get(f'location_' + date)
+            custom_location = request.form.get(f'custom_location_' + date)
 
-                    participants = request.form.getlist(f'participants_{date}_{i+1}')
-                    start_time = request.form.get(f'start_time_{date}_{i+1}')
-                    end_time = request.form.get(f'end_time_{date}_{i+1}')
-                    location = request.form.get(f'location_{date}_{i+1}')
-                    custom_location = request.form.get(f'custom_location_{date}_{i+1}')
+            if location == "その他" and custom_location:
+                location = custom_location
 
-                    if location == "その他" and custom_location:
-                        location = custom_location
+            # 現在の日本時間を取得して記録
+            jst = pytz.timezone('Asia/Tokyo')
+            now = datetime.datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
+            
+            updated = {
+                "plan_type": plan_type,  # 予定を更新
+                "participants": [p.strip() for p in participants],
+                "start_time": start_time,
+                "end_time": end_time,
+                "location": location,
+                "last_updated": now
+            }
 
-                    jst = pytz.timezone('Asia/Tokyo')
-                    now = datetime.datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
-
-                    updated_plan = {
-                        "plan_type": plan_type,
-                        "participants": [p.strip() for p in participants],
-                        "start_time": start_time,
-                        "end_time": end_time,
-                        "location": location,
-                        "last_updated": now
-                    }
-
-                    # 変更があれば更新
-                    if plan != updated_plan:
-                        original['plans'][i] = updated_plan
-                        changes_made = True
-
-                if changes_made:
-                    updated_dates.append(date)
-
-            else:
-                # 単一の予定がある場合
-                plan_type = request.form.get(f'plan_type_{date}')
-                custom_plan_type = request.form.get(f'custom_plan_type_{date}')
-
-                if plan_type == "その他" and custom_plan_type:
-                    plan_type = custom_plan_type
-
-                participants = request.form.getlist(f'participants_{date}')
-                start_time = request.form.get(f'start_time_{date}')
-                end_time = request.form.get(f'end_time_{date}')
-                location = request.form.get(f'location_{date}')
-                custom_location = request.form.get(f'custom_location_{date}')
-
-                if location == "その他" and custom_location:
-                    location = custom_location
-
-                jst = pytz.timezone('Asia/Tokyo')
-                now = datetime.datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
-
-                updated_plan = {
-                    "plan_type": plan_type,
-                    "participants": [p.strip() for p in participants],
-                    "start_time": start_time,
-                    "end_time": end_time,
-                    "location": location,
-                    "last_updated": now
-                }
-
-                # 変更があれば更新
-                if original != updated_plan:
-                    schedule_dict[date] = {'plans': [updated_plan]}
-                    changes_made = True
-                    updated_dates.append(date)
+            if original != updated:
+                schedule_dict[date] = updated
+                updated_dates.append(date)
+                changes_made = True
 
         if changes_made:
+            # スケジュールを保存
             save_schedule(schedule_dict)
+
+            # 各編集された練習情報を通知
+            for date in updated_dates:
+                # LINE Notifyの通知内容を設定
+                if "全員" in schedule_dict[date]['participants']:
+                    participants_str = '全員'
+                else:
+                    participants_str = '・'.join(schedule_dict[date]['participants']) + 'さん'
+                # 新しいスケジュールの追加を通知
+                message = f"練習スケジュールが更新されました。\n予定: {plan_type}\n日付: {date}\n時間: {start_time} ～ {end_time}\n場所: {location}\n参加者: {participants_str}"
+                #send_line_notify(message)
+        
             flash(f"{len(updated_dates)} 件の変更が保存されました。")
         else:
             flash("変更がありません。")
 
         return redirect(url_for('index'))
-                
+
     elif action == 'delete':
         if not selected_dates:
             flash("削除する日付を選択してください。")
@@ -406,7 +355,7 @@ def manage():
         else:
             flash("選択された日付はスケジュールに存在しませんでした。")
 
-        return redirect(url_for('index'))    
+        return redirect(url_for('index'))
 
 @app.route('/filter', methods=['POST'])
 @login_required
@@ -422,17 +371,17 @@ def filter():
             # 全員が選ばれた場合、予定が「全体練習」のスケジュールを表示
             filtered_schedule = {
                 date: details for date, details in schedule_dict.items()
-                if any(plan['plan_type'] == "全体練習" for plan in details.get('plans', []))  # 予定が「全体練習」かを判定
+                if details.get('plan_type') == "全体練習"  # 予定が「全体練習」かを判定
             }
         else:
             # 一部の部員が選択された場合、選択された部員が参加しているか、全体練習が含まれるスケジュールを表示
             filtered_schedule = {
                 date: details for date, details in schedule_dict.items()
-                if any(all(participant in plan.get('participants', []) for participant in selected_participants) or plan['plan_type'] == "全体練習"
-                       for plan in details.get('plans', []))
+                if all(participant in details['participants'] for participant in selected_participants) or details.get('plan_type') == "全体練習"
             }
 
     return render_template('index.html', schedule=filtered_schedule, participants_names=PARTICIPANTS_NAMES, user=current_user)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
