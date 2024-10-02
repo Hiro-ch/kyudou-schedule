@@ -288,6 +288,13 @@
                         </label>
                     {% endfor %}
                 </div>
+
+                <!-- AND/OR検索選択のラジオボタンを追加 -->
+                <div>
+                    <label><input type="radio" name="search_mode" value="AND" checked> AND検索</label>
+                    <label><input type="radio" name="search_mode" value="OR"> OR検索</label>
+                </div>
+
                 <button type="submit" class="filter-btn">フィルターを適用</button>
                 <button type="submit" name="show_all" value="true" class="filter-btn">すべて表示</button>
             </form>
