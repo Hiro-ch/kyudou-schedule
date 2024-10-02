@@ -365,23 +365,39 @@ def filter():
         filtered_schedule = schedule_dict
     else:
         selected_participants = request.form.getlist('participants_filter')
+        search_mode = request.form.get('search_mode', 'AND')  # ANDまたはOR検索の指定を取得
 
-        # 全員が選択されたかどうかを判定
-        if set(selected_participants) == set(PARTICIPANTS_NAMES):
-            # 全員が選ばれた場合、予定が「全体練習」のスケジュールを表示
-            filtered_schedule = {
-                date: details for date, details in schedule_dict.items()
-                if details.get('plan_type') == "全体練習"  # 予定が「全体練習」かを判定
-            }
+        # 参加者フィルターが選択されていない場合、全て表示
+        if not selected_participants:
+            filtered_schedule = schedule_dict
         else:
-            # 一部の部員が選択された場合、選択された部員が参加しているか、全体練習が含まれるスケジュールを表示
-            filtered_schedule = {
-                date: details for date, details in schedule_dict.items()
-                if all(participant in details['participants'] for participant in selected_participants) or details.get('plan_type') == "全体練習"
-            }
+            filtered_schedule = {}
+
+            # 各スケジュールをループ
+            for date, details in schedule_dict.items():
+                participants = details.get('participants', [])
+
+                # 「全員」がフィルターで選ばれている場合
+                if "全員" in selected_participants:
+                    # 参加者が「全員」の予定を表示
+                    if "全員" in participants:
+                        filtered_schedule[date] = details
+
+                # OR検索の場合（いずれかの選択された個人名が含まれるかを判定）
+                if search_mode == 'OR':
+                    if any(participant in selected_participants for participant in participants):
+                        filtered_schedule[date] = details
+
+                # AND検索の場合（すべての選択された個人名が参加者リストに含まれるかを判定）
+                elif search_mode == 'AND':
+                    if all(participant in participants for participant in selected_participants):
+                        filtered_schedule[date] = details
+
+                # 「全員」が含まれている場合（AND/ORに関係なく全員のスケジュールも表示）
+                if "全員" in participants:
+                    filtered_schedule[date] = details
 
     return render_template('index.html', schedule=filtered_schedule, participants_names=PARTICIPANTS_NAMES, user=current_user)
-
 
 if __name__ == '__main__':
     app.run(debug=True)
