@@ -1,32 +1,207 @@
 {
-    "10/17": {
-        "plan_type": "クラブ調整会議",
-        "participants": [
-            "山﨑大"
-        ],
-        "start_time": "12:20",
-        "end_time": "12:50",
-        "location": "講堂小ホール",
-        "last_updated": null
-    },
-    "11/28": {
-        "plan_type": "クラブ調整会議",
-        "participants": [
-            "山﨑大"
-        ],
-        "start_time": "12:20",
-        "end_time": "12:50",
-        "location": "講堂小ホール",
-        "last_updated": null
-    },
-    "12/19": {
-        "plan_type": "クラブ調整会議",
-        "participants": [
-            "山﨑大"
-        ],
-        "start_time": "12:20",
-        "end_time": "12:50",
-        "location": "講堂小ホール",
-        "last_updated": null
-    }
+    "10/11": [
+        {
+            "id": "a1d5e0d3-8c1d-4a6f-9e58-1c6e6d9f3a01",
+            "end_time": "17:50",
+            "last_updated": "2024-10-03 00:54:40",
+            "location": "広島市立大学",
+            "participants": [
+                "笠井",
+                "佐々木",
+                "竹原",
+                "前田",
+                "山﨑大"
+            ],
+            "plan_type": "個人練習",
+            "start_time": "16:20"
+        }
+    ],
+    "10/12": [
+        {
+            "id": "b2f1c0a4-5d2e-4b7f-8e69-2d7f7e8f4b12",
+            "end_time": "12:00",
+            "last_updated": "2024-10-03 00:55:17",
+            "location": "広島市立大学",
+            "participants": [
+                "全員"
+            ],
+            "plan_type": "部内戦",
+            "start_time": "10:00"
+        }
+    ],
+    "10/14": [
+        {
+            "id": "c3e2d1b5-6e3f-5c80-9f7a-3e8f8f9f5c23",
+            "end_time": "17:50",
+            "last_updated": "2024-10-03 00:55:59",
+            "location": "広島市立大学",
+            "participants": [
+                "真鍋",
+                "宮本",
+                "山﨑大"
+            ],
+            "plan_type": "個人練習",
+            "start_time": "16:20"
+        }
+    ],
+    "10/15": [
+        {
+            "id": "d4f3e2c6-7f40-6d91-af8b-4f9090a06d34",
+            "end_time": "12:10",
+            "last_updated": "2024-10-03 00:57:49",
+            "location": "広島市立大学",
+            "participants": [
+                "岡田",
+                "坂口",
+                "末益",
+                "平井"
+            ],
+            "plan_type": "個人練習",
+            "start_time": "10:40"
+        }
+    ],
+    "10/17": [
+        {
+            "id": "e5g4f3d7-8051-7ea2-b09c-5fa1a1b17e45",
+            "end_time": "12:50",
+            "last_updated": null,
+            "location": "講堂小ホール",
+            "participants": [
+                "山﨑大"
+            ],
+            "plan_type": "クラブ調整会議",
+            "start_time": "12:20"
+        }
+    ],
+    "10/18": [
+        {
+            "id": "f6h5g4e8-9162-8fb3-c1ad-6gb2b2c28f56",
+            "end_time": "17:50",
+            "last_updated": "2024-10-03 00:59:41",
+            "location": "広島市立大学",
+            "participants": [
+                "笠井",
+                "佐々木",
+                "竹原",
+                "前田",
+                "山﨑大"
+            ],
+            "plan_type": "個人練習",
+            "start_time": "16:20"
+        }
+    ],
+    "10/21": [
+        {
+            "id": "g7i6h5f9-0273-90c4-d2be-7hc3c3d39g67",
+            "end_time": "17:50",
+            "last_updated": "2024-10-03 11:17:36",
+            "location": "広島市立大学",
+            "participants": [
+                "真鍋",
+                "宮本",
+                "山﨑大"
+            ],
+            "plan_type": "大祭準備",
+            "start_time": "16:20"
+        }
+    ],
+    "10/22": [
+        {
+            "id": "h8j7i6g0-1384-a1d5-e3cf-8id4d4e4ah78",
+            "end_time": "12:10",
+            "last_updated": "2024-10-03 11:19:26",
+            "location": "広島市立大学",
+            "participants": [
+                "岡田",
+                "坂口",
+                "末益",
+                "平井"
+            ],
+            "plan_type": "大祭準備",
+            "start_time": "10:40"
+        }
+    ],
+    "10/23": [
+        {
+            "id": "i9k8j7h1-2495-b2e6-f4dg-9je5e5f5bi89",
+            "end_time": "14:30",
+            "last_updated": "2024-10-03 11:20:10",
+            "location": "広島市立大学",
+            "participants": [
+                "堀田",
+                "山崎康"
+            ],
+            "plan_type": "大祭準備",
+            "start_time": "13:00"
+        }
+    ],
+    "10/25": [
+        {
+            "id": "j0l9k8i2-35a6-c3f7-g5eh-0kf6f6g6cj90",
+            "end_time": "17:50",
+            "last_updated": "2024-10-03 11:21:09",
+            "location": "広島市立大学",
+            "participants": [
+                "笠井",
+                "佐々木",
+                "竹原",
+                "前田",
+                "山﨑大"
+            ],
+            "plan_type": "大祭準備",
+            "start_time": "16:20"
+        }
+    ],
+    "10/26": [
+        {
+            "id": "k1m0l9j3-46b7-d4g8-h6fi-1lg7g7h7dk01",
+            "end_time": "18:00",
+            "last_updated": "2024-10-03 01:00:37",
+            "location": "広島市立大学",
+            "participants": [
+                "全員"
+            ],
+            "plan_type": "大学祭",
+            "start_time": "10:00"
+        }
+    ],
+    "10/27": [
+        {
+            "id": "l2n1m0k4-57c8-e5h9-i7gj-2mh8h8i8el12",
+            "end_time": "18:00",
+            "last_updated": "2024-10-03 01:00:58",
+            "location": "広島市立大学",
+            "participants": [
+                "全員"
+            ],
+            "plan_type": "大学祭",
+            "start_time": "10:00"
+        }
+    ],
+    "11/28": [
+        {
+            "id": "m3o2n1l5-68d9-f6i0-j8hk-3ni9i9j9fm23",
+            "end_time": "12:50",
+            "last_updated": null,
+            "location": "講堂小ホール",
+            "participants": [
+                "山﨑大"
+            ],
+            "plan_type": "クラブ調整会議",
+            "start_time": "12:20"
+        }
+    ],
+    "12/19": [
+        {
+            "id": "n4p3o2m6-79ea-g7j1-k9il-4oj0j0k0gn34",
+            "end_time": "12:50",
+            "last_updated": null,
+            "location": "講堂小ホール",
+            "participants": [
+                "山﨑大"
+            ],
+            "plan_type": "クラブ調整会議",
+            "start_time": "12:20"
+        }
+    ]
 }

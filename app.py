@@ -8,6 +8,7 @@ import pytz
 import requests
 import locale
 import platform
+import uuid  # ユニークIDを生成するために追加
 
 # .envファイルから環境変数をロード
 load_dotenv()
@@ -17,29 +18,21 @@ app.secret_key = os.getenv('SECRET_KEY', 'your_default_secret_key')
 
 @app.route('/static/<path:filename>')
 def custom_static(filename):
-    # send_from_directoryを使用して静的ファイルを配信
-    # cache_timeoutを秒単位で指定（ここでは1時間=3600秒）
     return send_from_directory('static', filename, cache_timeout=3600)
 
 # Flask-Loginの設定
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'login'  # ログインページを指定
+login_manager.login_view = 'login'
 
-# セッションが永続化されないように設定
 app.config['SESSION_PERMANENT'] = False
 
-# 一般ユーザーのパスワードを環境変数から取得
+# 環境変数から情報を取得
 USER_PASSWORD = os.getenv('USER_PASSWORD')
-
-# 管理者情報を環境変数から取得
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
-
-# 環境変数から参加者の名前を取得
 PARTICIPANTS_NAMES = os.getenv('PARTICIPANTS_NAMES', '').split(',')
 
-# 日本語ロケールを設定
 locale.setlocale(locale.LC_ALL, '')
 
 # 日付をdatetimeオブジェクトに変換するフィルタを作成
@@ -50,13 +43,9 @@ def todate(date_str):
 # 日付をdatetimeオブジェクトに変換し、その日付の曜日を日本語で取得するフィルタ
 @app.template_filter('next_weekday')
 def next_weekday(date_str):
-    # 日付をdatetimeオブジェクトに変換
     date = datetime.datetime.strptime(date_str, '%m/%d')
-    # 一日後の日付を取得
-    next_day = date + datetime.timedelta(days=1)
-    # 一日後の曜日を日本語で取得
     weekdays_jp = ['月', '火', '水', '木', '金', '土', '日']
-    return weekdays_jp[next_day.weekday()]
+    return weekdays_jp[date.weekday()]
 
 # ダミーユーザークラス
 class User(UserMixin):
@@ -68,9 +57,9 @@ class User(UserMixin):
 @login_manager.user_loader
 def load_user(user_id):
     if user_id == "1":
-        return User(id=1, is_admin=True)  # 管理者ユーザー
+        return User(id=1, is_admin=True)
     elif user_id == "2":
-        return User(id=2, is_admin=False)  # 一般ユーザー
+        return User(id=2, is_admin=False)
     return None
 
 # 共通のログインページのルート
@@ -82,11 +71,20 @@ def login():
 def load_schedule():
     with open('schedule.json', 'r', encoding='utf-8') as f:
         schedule = json.load(f)
-    # OSに依存しない日付のフォーマット処理
+    # 各日付の値がリストであることを保証
+    for date, schedules in schedule.items():
+        if not isinstance(schedules, list):
+            schedule[date] = [schedules]
+        # 各スケジュールに'id'がない場合は割り当てる
+        for schedule_item in schedule[date]:
+            if 'id' not in schedule_item:
+                schedule_item['id'] = str(uuid.uuid4())
+    # スケジュールを保存して、付与した'id'を保存
+    with open('schedule.json', 'w', encoding='utf-8') as f:
+        json.dump(schedule, f, ensure_ascii=False, indent=4)
+    # 日付でソート
     def parse_date(date_str):
-        # 日付の文字列をdatetimeオブジェクトに変換
         return datetime.datetime.strptime(date_str, '%m/%d')
-    # スケジュールを昇順にソート
     sorted_schedule = dict(sorted(schedule.items(), key=lambda item: parse_date(item[0])))
     return sorted_schedule
 
@@ -95,53 +93,14 @@ def save_schedule(schedule_dict):
     with open('schedule.json', 'w', encoding='utf-8') as f:
         json.dump(schedule_dict, f, ensure_ascii=False, indent=4)
 
-# 練習スケジュールを読み込み
+# スケジュールを読み込み
 schedule_dict = load_schedule()
-
-# LINE Notifyの設定
-line_notify_token = os.getenv('LINE_NOTIFY_TOKEN')
-line_notify_api = 'https://notify-api.line.me/api/notify'
-
-def send_line_notify(message):
-    headers = {
-        'Authorization': f'Bearer {line_notify_token}'
-    }
-    data = {
-        'message': message
-    }
-    response = requests.post(line_notify_api, headers=headers, data=data)
-    if response.status_code == 200:
-        print("LINE通知を送信しました。")
-    else:
-        print(f"通知の送信に失敗しました: {response.status_code}")
-
-# APIエンドポイント: スケジュールを取得する
-@app.route('/api/schedule', methods=['GET'])
-def get_schedule():
-    schedule = load_schedule()
-    return jsonify(schedule)
-
-@app.route('/api/update_schedule', methods=['POST'])
-def update_schedule():
-    global schedule_dict
-    new_schedule = request.json  # 受け取ったJSONデータを取得
-    if new_schedule:
-        # 日付をdatetimeオブジェクトに変換して昇順にソート
-        sorted_schedule = dict(sorted(new_schedule.items(), key=lambda item: datetime.datetime.strptime(item[0], '%m/%d')))
-        schedule_dict = sorted_schedule  # グローバル変数を更新
-        save_schedule(schedule_dict)  # 新しいスケジュールを保存
-        print("スケジュールが更新されました。")
-        return jsonify({"message": "スケジュールが更新されました。"}), 200
-    else:
-        return jsonify({"message": "スケジュールの更新に失敗しました。"}), 400
-
 
 # 一般ユーザー用ログインページのルート
 @app.route('/user_login', methods=['POST'])
 def user_login():
     password = request.form['user_password']
 
-    # 一般ユーザーのパスワードをチェック
     if password == USER_PASSWORD:
         user = User(id=2, is_admin=False)
         login_user(user, remember=False)
@@ -156,7 +115,6 @@ def admin_login():
     username = request.form['username']
     password = request.form['password']
 
-    # 管理者のユーザー名とパスワードをチェック
     if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
         user = User(id=1, is_admin=True)
         login_user(user, remember=False)
@@ -178,6 +136,7 @@ def logout():
 def index():
     return render_template('index.html', schedule=schedule_dict, participants_names=PARTICIPANTS_NAMES, user=current_user)
 
+# スケジュールの追加
 @app.route('/add', methods=['POST'])
 @login_required
 def add():
@@ -185,44 +144,32 @@ def add():
         flash("管理者のみがスケジュールを追加できます。")
         return redirect(url_for('index'))
 
-    # YYYY-MM-DD 形式の日付を取得
-    date = request.form['date']  # 例: '2024-09-24'
-    
-    # OSによってフォーマットを変更
+    date = request.form['date']
     if platform.system() == 'Windows':
-        date = datetime.datetime.strptime(date, '%Y-%m-%d').strftime('%#m/%#d')  # Windows用
+        date = datetime.datetime.strptime(date, '%Y-%m-%d').strftime('%#m/%#d')
     else:
-        date = datetime.datetime.strptime(date, '%Y-%m-%d').strftime('%-m/%-d')  # macOS/Linux用
-
-    # 既存のスケジュールをチェック
-    if date in schedule_dict:
-        flash(f"追加しようとしている日はすでに練習が予定されています: {date}")
-        return redirect(url_for('index'))
+        date = datetime.datetime.strptime(date, '%Y-%m-%d').strftime('%-m/%-d')
 
     plan_type = request.form['plan_type']
     custom_plan_type = request.form.get('custom_plan_type')
-
-    # 予定が「その他」の場合、自由入力フィールドの値を使う
     if plan_type == "その他" and custom_plan_type:
         plan_type = custom_plan_type
 
-    # チェックボックスから参加者を取得
     participants = request.form.getlist('participants')
     start_time = request.form['start_time']
     end_time = request.form['end_time']
     location = request.form['location']
     custom_location = request.form.get('custom_location')
-
-    # 「その他」が選択され、自由入力フィールドが記入されている場合、その内容を保存
     if location == "その他" and custom_location:
         location = custom_location
 
-    # 現在の日本時間を取得して記録
     jst = pytz.timezone('Asia/Tokyo')
     now = datetime.datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
 
-    schedule_dict[date] = {
-        "plan_type": plan_type,  # 予定を保存
+    # ユニークなIDを付与
+    new_schedule = {
+        "id": str(uuid.uuid4()),
+        "plan_type": plan_type,
         "participants": [p.strip() for p in participants],
         "start_time": start_time,
         "end_time": end_time,
@@ -230,31 +177,24 @@ def add():
         "last_updated": now
     }
 
-    # 追加後にスケジュールを昇順にソート
+    if date not in schedule_dict:
+        schedule_dict[date] = []
+
+    schedule_dict[date].append(new_schedule)
+
+    # 日付でソート
     def parse_date(date_str):
         return datetime.datetime.strptime(date_str, '%m/%d')
-
     sorted_schedule = dict(sorted(schedule_dict.items(), key=lambda item: parse_date(item[0])))
 
-    # ソートされたスケジュールを保存
     schedule_dict.clear()
     schedule_dict.update(sorted_schedule)
-    # スケジュールを保存
+
     save_schedule(schedule_dict)
-
-    # LINE Notifyの通知内容を設定
-    if "全員" in schedule_dict[date]['participants']:
-        participants_str = '全員'
-    else:
-        participants_str = '・'.join(schedule_dict[date]['participants']) + 'さん'
-
-    # 新しいスケジュールの追加を通知
-    message = f"新しい練習スケジュールが追加されました。\n予定: {plan_type}\n日付: {date}\n時間: {start_time} ～ {end_time}\n場所: {location}\n参加者: {participants_str}"
-    #send_line_notify(message)
-
     flash("新しいスケジュールが追加されました。")
     return redirect(url_for('index'))
 
+# スケジュールの編集・削除
 @app.route('/manage', methods=['POST'])
 @login_required
 def manage():
@@ -263,139 +203,125 @@ def manage():
         return redirect(url_for('index'))
 
     action = request.form.get('action')
-    selected_dates = request.form.getlist('dates')
-    
+    selected_schedule_ids = request.form.getlist('schedule_ids')
+
     if action == 'edit':
         changes_made = False
-        updated_dates = []
+        updated_ids = []
 
-        for date in selected_dates:
-            original = schedule_dict.get(date, {})
+        for schedule_id in selected_schedule_ids:
+            found = False
+            for date, schedule_list in schedule_dict.items():
+                for i, schedule_item in enumerate(schedule_list):
+                    if schedule_item.get('id') == schedule_id:
+                        found = True
+                        original = schedule_item
 
-             # フォームから「予定」と「カスタム予定」を取得
-            plan_type = request.form.get(f'plan_type_{date}')
-            custom_plan_type = request.form.get(f'custom_plan_type_{date}')
+                        plan_type = request.form.get(f'plan_type_{schedule_id}')
+                        custom_plan_type = request.form.get(f'custom_plan_type_{schedule_id}')
+                        if plan_type == "その他" and custom_plan_type:
+                            plan_type = custom_plan_type
 
-            # 「予定」が「その他」の場合、自由入力された値を使用
-            if plan_type == "その他" and custom_plan_type:
-                plan_type = custom_plan_type
-                
-            # チェックボックスから選択された参加者を取得
-            participants = request.form.getlist(f'participants_{date}')
-            
-            start_time = request.form.get(f'start_time_{date}')
-            end_time = request.form.get(f'end_time_{date}')
-            location = request.form.get(f'location_' + date)
-            custom_location = request.form.get(f'custom_location_' + date)
+                        participants = request.form.getlist(f'participants_{schedule_id}')
+                        start_time = request.form.get(f'start_time_{schedule_id}')
+                        end_time = request.form.get(f'end_time_{schedule_id}')
+                        location = request.form.get(f'location_{schedule_id}')
+                        custom_location = request.form.get(f'custom_location_{schedule_id}')
+                        if location == "その他" and custom_location:
+                            location = custom_location
 
-            if location == "その他" and custom_location:
-                location = custom_location
+                        jst = pytz.timezone('Asia/Tokyo')
+                        now = datetime.datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
 
-            # 現在の日本時間を取得して記録
-            jst = pytz.timezone('Asia/Tokyo')
-            now = datetime.datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
-            
-            updated = {
-                "plan_type": plan_type,  # 予定を更新
-                "participants": [p.strip() for p in participants],
-                "start_time": start_time,
-                "end_time": end_time,
-                "location": location,
-                "last_updated": now
-            }
+                        updated = {
+                            "id": schedule_id,
+                            "plan_type": plan_type,
+                            "participants": [p.strip() for p in participants],
+                            "start_time": start_time,
+                            "end_time": end_time,
+                            "location": location,
+                            "last_updated": now
+                        }
 
-            if original != updated:
-                schedule_dict[date] = updated
-                updated_dates.append(date)
-                changes_made = True
+                        if original != updated:
+                            schedule_dict[date][i] = updated
+                            updated_ids.append(schedule_id)
+                            changes_made = True
+                        break
+                if found:
+                    break
 
         if changes_made:
-            # スケジュールを保存
             save_schedule(schedule_dict)
-
-            # 各編集された練習情報を通知
-            for date in updated_dates:
-                # LINE Notifyの通知内容を設定
-                if "全員" in schedule_dict[date]['participants']:
-                    participants_str = '全員'
-                else:
-                    participants_str = '・'.join(schedule_dict[date]['participants']) + 'さん'
-                # 新しいスケジュールの追加を通知
-                message = f"練習スケジュールが更新されました。\n予定: {plan_type}\n日付: {date}\n時間: {start_time} ～ {end_time}\n場所: {location}\n参加者: {participants_str}"
-                #send_line_notify(message)
-        
-            flash(f"{len(updated_dates)} 件の変更が保存されました。")
+            flash(f"{len(updated_ids)} 件の変更が保存されました。")
         else:
             flash("変更がありません。")
-
         return redirect(url_for('index'))
 
     elif action == 'delete':
-        if not selected_dates:
-            flash("削除する日付を選択してください。")
+        if not selected_schedule_ids:
+            flash("削除する予定を選択してください。")
             return redirect(url_for('index'))
 
-        deleted_dates = []
+        deleted_ids = []
 
-        for date in selected_dates:
-            if date in schedule_dict:
-                del schedule_dict[date]
-                deleted_dates.append(date)
+        for schedule_id in selected_schedule_ids:
+            found = False
+            for date, schedule_list in list(schedule_dict.items()):
+                for i, schedule_item in enumerate(schedule_list):
+                    if schedule_item.get('id') == schedule_id:
+                        del schedule_list[i]
+                        deleted_ids.append(schedule_id)
+                        found = True
+                        break
+                if found:
+                    if not schedule_list:
+                        del schedule_dict[date]
+                    break
 
-        if deleted_dates:
-            # スケジュールを保存
+        if deleted_ids:
             save_schedule(schedule_dict)
-
-            # 削除された情報を通知
-            message = f"練習スケジュールが削除されました。\n日付: {', '.join(deleted_dates)}"
-            #send_line_notify(message)
-        
-            # 削除された件数をflashメッセージで表示
-            flash(f"{len(deleted_dates)} 件のスケジュールが削除されました。")
+            flash(f"{len(deleted_ids)} 件のスケジュールが削除されました。")
         else:
-            flash("選択された日付はスケジュールに存在しませんでした。")
+            flash("選択された予定はスケジュールに存在しませんでした。")
 
         return redirect(url_for('index'))
 
+# フィルタリング機能の修正
 @app.route('/filter', methods=['POST'])
 @login_required
 def filter():
-    # "show_all"がフォームから送信された場合、全てのスケジュールを表示
     if 'show_all' in request.form:
         filtered_schedule = schedule_dict
     else:
         selected_participants = request.form.getlist('participants_filter')
-        search_mode = request.form.get('search_mode', 'AND')  # ANDまたはOR検索の指定を取得
+        search_mode = request.form.get('search_mode', 'AND')
 
-        # 参加者フィルターが選択されていない場合、全て表示
         if not selected_participants:
             filtered_schedule = schedule_dict
         else:
             filtered_schedule = {}
 
-            # 各スケジュールをループ
-            for date, details in schedule_dict.items():
-                participants = details.get('participants', [])
+            for date, schedule_list in schedule_dict.items():
+                filtered_list = []
+                for details in schedule_list:
+                    participants = details.get('participants', [])
 
-                # 「全員」がフィルターで選ばれている場合
-                if "全員" in selected_participants:
-                    # 参加者が「全員」の予定を表示
+                    if "全員" in selected_participants:
+                        if "全員" in participants:
+                            filtered_list.append(details)
+                            continue
+
+                    if search_mode == 'OR':
+                        if any(participant in selected_participants for participant in participants):
+                            filtered_list.append(details)
+                    elif search_mode == 'AND':
+                        if all(participant in participants for participant in selected_participants):
+                            filtered_list.append(details)
                     if "全員" in participants:
-                        filtered_schedule[date] = details
-
-                # OR検索の場合（いずれかの選択された個人名が含まれるかを判定）
-                if search_mode == 'OR':
-                    if any(participant in selected_participants for participant in participants):
-                        filtered_schedule[date] = details
-
-                # AND検索の場合（すべての選択された個人名が参加者リストに含まれるかを判定）
-                elif search_mode == 'AND':
-                    if all(participant in participants for participant in selected_participants):
-                        filtered_schedule[date] = details
-
-                # 「全員」が含まれている場合（AND/ORに関係なく全員のスケジュールも表示）
-                if "全員" in participants:
-                    filtered_schedule[date] = details
+                        filtered_list.append(details)
+                if filtered_list:
+                    filtered_schedule[date] = filtered_list
 
     return render_template('index.html', schedule=filtered_schedule, participants_names=PARTICIPANTS_NAMES, user=current_user)
 

@@ -7,80 +7,73 @@
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="icon" href="static/images/favicon.ico">
     <script>
-        // フィルターボタンの表示/非表示
+        // JavaScriptコード
+
         function toggleFilter() {
-        var filterContainer = document.getElementById("filter-container");
-        var toggleButton = document.getElementById("toggle-filter");
-        if (filterContainer.style.display === "none") {
-            filterContainer.style.display = "block";
-            toggleButton.textContent = "△";  // ボタンのテキストを上向きの不等号に変更
-        } else {
-            filterContainer.style.display = "none";
-            toggleButton.textContent = "▽";  // ボタンのテキストを下向きの不等号に変更
+            var filterContainer = document.getElementById("filter-container");
+            var toggleButton = document.getElementById("toggle-filter");
+            if (filterContainer.style.display === "none") {
+                filterContainer.style.display = "block";
+                toggleButton.textContent = "△";
+            } else {
+                filterContainer.style.display = "none";
+                toggleButton.textContent = "▽";
+            }
         }
-    }
+
         function enableEditing() {
-            const checkboxes = document.querySelectorAll('input[name="dates"]:checked');
+            const checkboxes = document.querySelectorAll('input[name="schedule_ids"]:checked');
             checkboxes.forEach((checkbox) => {
-                const date = checkbox.value;
-                document.getElementById('plan_type_' + date).disabled = false; // 予定のドロップダウンメニューを有効にする
-                document.getElementById('custom_plan_type_' + date).disabled = false;  // カスタム「予定」の入力欄も有効化
-                document.getElementById('participants_display_' + date).style.display = 'none'; // 参加者名の表示を非表示
-                document.getElementById('participants_edit_' + date).style.display = 'block'; // 参加者のチェックボックスを表示
-                document.getElementById('start_time_' + date).disabled = false;
-                document.getElementById('end_time_' + date).disabled = false;
-                document.getElementById('location_' + date).disabled = false;
-                document.getElementById('time_display_' + date).style.display = 'none'; // 時間の表示を非表示
-                document.getElementById('time_edit_' + date).style.display = 'block'; // 時間の編集を表示
+                const schedule_id = checkbox.value;
+                document.getElementById('plan_type_' + schedule_id).disabled = false;
+                document.getElementById('custom_plan_type_' + schedule_id).disabled = false;
+                document.getElementById('participants_display_' + schedule_id).style.display = 'none';
+                document.getElementById('participants_edit_' + schedule_id).style.display = 'block';
+                document.getElementById('start_time_' + schedule_id).disabled = false;
+                document.getElementById('end_time_' + schedule_id).disabled = false;
+                document.getElementById('location_' + schedule_id).disabled = false;
+                document.getElementById('custom_location_' + schedule_id).disabled = false;
+                document.getElementById('time_display_' + schedule_id).style.display = 'none';
+                document.getElementById('time_edit_' + schedule_id).style.display = 'block';
             });
         }
 
-        // キャンセルボタンを押した際、変更を破棄して元に戻す
         function cancelEditing() {
-            const checkboxes = document.querySelectorAll('input[name="dates"]');
+            const checkboxes = document.querySelectorAll('input[name="schedule_ids"]');
             checkboxes.forEach((checkbox) => {
                 checkbox.checked = false;
 
-                const date = checkbox.value;
+                const schedule_id = checkbox.value;
 
-                // 「予定」のドロップダウンを初期値に戻す
-                const planTypeElement = document.getElementById('plan_type_' + date);
-                const customPlanTypeElement = document.getElementById('custom_plan_type_' + date);
+                const planTypeElement = document.getElementById('plan_type_' + schedule_id);
+                const customPlanTypeElement = document.getElementById('custom_plan_type_' + schedule_id);
 
-                // data-original-valueに保存された初期値を元に戻す
                 planTypeElement.value = planTypeElement.getAttribute('data-original-value');
                 customPlanTypeElement.value = customPlanTypeElement.getAttribute('data-original-value');
-                toggleCustomPlanTypeInput(date);  // カスタム入力欄の表示も元に戻す
+                toggleCustomPlanTypeInput(schedule_id);
 
-                // カスタム「予定」を無効化
                 customPlanTypeElement.disabled = true;
 
-                // **場所のセレクトボックスとカスタム入力欄を元の値に戻す**
-                const locationElement = document.getElementById('location_' + date);
-                const customLocationElement = document.getElementById('custom_location_' + date);
+                const locationElement = document.getElementById('location_' + schedule_id);
+                const customLocationElement = document.getElementById('custom_location_' + schedule_id);
 
-                // data-original-valueに保存された初期値を元に戻す
                 locationElement.value = locationElement.getAttribute('data-original-value');
                 customLocationElement.value = customLocationElement.getAttribute('data-original-value');
 
-                // カスタム入力欄の表示状態を元に戻す
-                toggleCustomLocationInput(date);
-                
-                // 「予定」のドロップダウンとカスタム入力欄を無効化
+                toggleCustomLocationInput(schedule_id);
+
+                locationElement.disabled = true;
+                customLocationElement.disabled = true;
+
                 planTypeElement.disabled = true;
                 customPlanTypeElement.disabled = true;
 
-                // カスタム「場所」を無効化
-                customLocationElement.disabled = true;
-                locationElement.disabled = true;
-
-                // 他の項目を元に戻す
-                document.getElementById('participants_display_' + date).style.display = 'block';
-                document.getElementById('participants_edit_' + date).style.display = 'none';
-                document.getElementById('start_time_' + date).disabled = true;
-                document.getElementById('end_time_' + date).disabled = true;
-                document.getElementById('time_display_' + date).style.display = 'block';
-                document.getElementById('time_edit_' + date).style.display = 'none';
+                document.getElementById('participants_display_' + schedule_id).style.display = 'block';
+                document.getElementById('participants_edit_' + schedule_id).style.display = 'none';
+                document.getElementById('start_time_' + schedule_id).disabled = true;
+                document.getElementById('end_time_' + schedule_id).disabled = true;
+                document.getElementById('time_display_' + schedule_id).style.display = 'block';
+                document.getElementById('time_edit_' + schedule_id).style.display = 'none';
             });
         }
 
@@ -88,32 +81,29 @@
             if (actionType === 'delete') {
                 return confirm("本当に削除しますか？");
             } else if (actionType === 'edit') {
-                // 編集後の内容を取得
-                const selectedDates = Array.from(document.querySelectorAll('input[name="dates"]:checked')).map(el => el.value);
+                const selectedScheduleIds = Array.from(document.querySelectorAll('input[name="schedule_ids"]:checked')).map(el => el.value);
 
-                if (selectedDates.length === 0) {
+                if (selectedScheduleIds.length === 0) {
                     alert("編集する項目を選択してください。");
                     return false;
                 }
 
                 let confirmationMessage = "以下の内容で変更を保存しますか？\n\n";
 
-                selectedDates.forEach(date => {
-                    const planType = document.getElementById('plan_type_' + date).value;
-                    const customPlan = document.getElementById('custom_plan_type_' + date).value;
-                    const participants = Array.from(document.querySelectorAll('input[name="participants_' + date + '"]:checked')).map(el => el.value).join('・');
-                    const startTime = document.getElementById('start_time_' + date).value;
-                    const endTime = document.getElementById('end_time_' + date).value;
-                    const location = document.getElementById('location_' + date).value;
-                    const customLocation = document.getElementById('custom_location_' + date).value;
+                selectedScheduleIds.forEach(schedule_id => {
+                    const planType = document.getElementById('plan_type_' + schedule_id).value;
+                    const customPlan = document.getElementById('custom_plan_type_' + schedule_id).value;
+                    const participants = Array.from(document.querySelectorAll('input[name="participants_' + schedule_id + '"]:checked')).map(el => el.value).join('・');
+                    const startTime = document.getElementById('start_time_' + schedule_id).value;
+                    const endTime = document.getElementById('end_time_' + schedule_id).value;
+                    const location = document.getElementById('location_' + schedule_id).value;
+                    const customLocation = document.getElementById('custom_location_' + schedule_id).value;
 
-                    // 確認メッセージに編集後の情報を追加
-                    confirmationMessage += `日付: ${date}\n予定: ${customPlan || planType}\n参加者: ${participants}\n時間: ${startTime} ～ ${endTime}\n場所: ${customLocation || location}\n\n`;
+                    confirmationMessage += `予定: ${customPlan || planType}\n参加者: ${participants}\n時間: ${startTime} ～ ${endTime}\n場所: ${customLocation || location}\n\n`;
                 });
 
-                // 確認ダイアログを表示し、キャンセルされた場合はcancelEditingを呼び出す
                 if (!confirm(confirmationMessage)) {
-                    cancelEditing();  // キャンセルボタンが押されたらcancelEditing関数を呼び出す
+                    cancelEditing();
                     return false;
                 }
                 return true;
@@ -145,9 +135,9 @@
             return false;
         }
 
-        function toggleCustomPlanTypeInput(date) {
-            const selectElement = document.getElementById('plan_type_' + date);
-            const customInputElement = document.getElementById('custom_plan_type_' + date);
+        function toggleCustomPlanTypeInput(schedule_id) {
+            const selectElement = document.getElementById('plan_type_' + schedule_id);
+            const customInputElement = document.getElementById('custom_plan_type_' + schedule_id);
             if (selectElement.value === 'その他') {
                 customInputElement.style.display = 'inline';
                 customInputElement.disabled = false;
@@ -157,9 +147,9 @@
             }
         }
 
-        function toggleCustomLocationInput(date) {
-            const selectElement = document.getElementById('location_' + date);
-            const customInputElement = document.getElementById('custom_location_' + date);
+        function toggleCustomLocationInput(schedule_id) {
+            const selectElement = document.getElementById('location_' + schedule_id);
+            const customInputElement = document.getElementById('custom_location_' + schedule_id);
             if (selectElement.value === 'その他') {
                 customInputElement.style.display = 'inline';
                 customInputElement.disabled = false;
@@ -193,41 +183,36 @@
             }
         }
 
-        // 追加フォームのリセット機能
         function cancelAdding() {
-            document.getElementById('add-form').reset();  // 追加フォームを初期化
+            document.getElementById('add-form').reset();
         }
 
         function scrollToBottom() {
-            const checkedCheckboxes = document.querySelectorAll('input[name="dates"]:checked');
+            const checkedCheckboxes = document.querySelectorAll('input[name="schedule_ids"]:checked');
             if (checkedCheckboxes.length > 0) {
-            // 編集ボタンが含まれるコンテナにスクロール
-            const editContainer = document.querySelector('.action-buttons');
-            if (editContainer) {
-                const containerPosition = editContainer.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 2) + (editContainer.offsetHeight / 2);
-                window.scrollTo({ top: containerPosition, behavior: 'smooth' });
-            }
+                const editContainer = document.querySelector('.action-buttons');
+                if (editContainer) {
+                    const containerPosition = editContainer.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 2) + (editContainer.offsetHeight / 2);
+                    window.scrollTo({ top: containerPosition, behavior: 'smooth' });
+                }
             } else {
-                // 通常の最下部にスクロール
                 window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             }
         }
 
         function scrollToTop() {
-            const checkedCheckboxes = document.querySelectorAll('input[name="dates"]:checked');
+            const checkedCheckboxes = document.querySelectorAll('input[name="schedule_ids"]:checked');
             if (checkedCheckboxes.length > 0) {
-                // 一番上のチェックされた予定にスクロール
                 const firstChecked = checkedCheckboxes[0];
                 const targetPosition = firstChecked.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 2);
                 window.scrollTo({ top: targetPosition, behavior: 'smooth' });
             } else {
-                // 通常の最上部にスクロール
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
-        // 追加するJavaScriptコード
+
         document.addEventListener('DOMContentLoaded', function() {
-            const dateCheckboxes = document.querySelectorAll('input[name="dates"]');
+            const dateCheckboxes = document.querySelectorAll('input[name="schedule_ids"]');
             const scrollButtons = document.querySelectorAll('.scroll-btn');
 
             dateCheckboxes.forEach(function(checkbox) {
@@ -302,64 +287,67 @@
 
         <form action="{{ url_for('manage') }}" method="post">
             <ul class="schedule-list">
-                {% for date, details in schedule.items() %}
+                {% for date, schedule_list in schedule.items() %}
                 <li>
-                    <input type="checkbox" name="dates" value="{{ date }}">
                     <strong>{{ date }} ({{ date | next_weekday }})</strong>
-                    <div class="schedule-detail">
-                        <div class="schedule-item">
-                            <label for="plan_type_{{ date }}">予定:</label>
-                            <select id="plan_type_{{ date }}" name="plan_type_{{ date }}" onchange="toggleCustomPlanTypeInput('{{ date }}')" disabled data-original-value="{{ details.plan_type }}">
-                                <option value="全体練習" {% if details.plan_type == "全体練習" %}selected{% endif %}>全体練習</option>
-                                <option value="個人練習" {% if details.plan_type == "個人練習" %}selected{% endif %}>個人練習</option>
-                                <option value="クラブ調整会議" {% if details.plan_type == "クラブ調整会議" %}selected{% endif %}>クラブ調整会議</option>
-                                <option value="その他" {% if details.plan_type not in ["全体練習", "個人練習", "クラブ調整会議"] %}selected{% endif %}>その他</option>
-                            </select>
-                            <input type="text" id="custom_plan_type_{{ date }}" name="custom_plan_type_{{ date }}" value="{{ details.plan_type if details.plan_type not in ['全体練習', '個人練習', 'クラブ調整会議'] else '' }}" {% if details.plan_type in ["全体練習", "個人練習", "クラブ調整会議"] %}style="display:none;"{% endif %} disabled data-original-value="{{ details.plan_type if details.plan_type not in ['全体練習', '個人練習', 'クラブ調整会議'] else '' }}" placeholder="予定を入力">
-                        </div>
-                        <div class="schedule-item">
-                            <label>参加者:</label>
-                            <div id="participants_display_{{ date }}">
-                                <!-- 参加者を「・」でつないで表示 -->
-                                {{ details.participants | join('・') }}
+                    {% for details in schedule_list %}
+                    <div class="schedule-item">
+                        <input type="checkbox" name="schedule_ids" value="{{ details.id }}">
+                        <div class="schedule-detail">
+                            <div class="schedule-item">
+                                <label for="plan_type_{{ details.id }}">予定:</label>
+                                <select id="plan_type_{{ details.id }}" name="plan_type_{{ details.id }}" onchange="toggleCustomPlanTypeInput('{{ details.id }}')" disabled data-original-value="{{ details.plan_type }}">
+                                    <option value="全体練習" {% if details.plan_type == "全体練習" %}selected{% endif %}>全体練習</option>
+                                    <option value="個人練習" {% if details.plan_type == "個人練習" %}selected{% endif %}>個人練習</option>
+                                    <option value="クラブ調整会議" {% if details.plan_type == "クラブ調整会議" %}selected{% endif %}>クラブ調整会議</option>
+                                    <option value="その他" {% if details.plan_type not in ["全体練習", "個人練習", "クラブ調整会議"] %}selected{% endif %}>その他</option>
+                                </select>
+                                <input type="text" id="custom_plan_type_{{ details.id }}" name="custom_plan_type_{{ details.id }}" value="{{ details.plan_type if details.plan_type not in ['全体練習', '個人練習', 'クラブ調整会議'] else '' }}" {% if details.plan_type in ["全体練習", "個人練習", "クラブ調整会議"] %}style="display:none;"{% endif %} disabled data-original-value="{{ details.plan_type if details.plan_type not in ['全体練習', '個人練習', 'クラブ調整会議'] else '' }}" placeholder="予定を入力">
                             </div>
-                            <div id="participants_edit_{{ date }}" style="display: none;">
-                                {% for participant in participants_names %}
-                                    <label class="participant-checkbox">
-                                        <input type="checkbox" name="participants_{{ date }}" value="{{ participant }}" {% if participant in details.participants %}checked{% endif %}>
-                                        {{ participant }}
-                                    </label>
-                                {% endfor %}
+                            <div class="schedule-item">
+                                <label>参加者:</label>
+                                <div id="participants_display_{{ details.id }}">
+                                    {{ details.participants | join('・') }}
+                                </div>
+                                <div id="participants_edit_{{ details.id }}" style="display: none;">
+                                    {% for participant in participants_names %}
+                                        <label class="participant-checkbox">
+                                            <input type="checkbox" name="participants_{{ details.id }}" value="{{ participant }}" {% if participant in details.participants %}checked{% endif %}>
+                                            {{ participant }}
+                                        </label>
+                                    {% endfor %}
+                                </div>
                             </div>
-                        </div>
-                        <div class="schedule-item">
-                            <label>時間:</label>
-                            <div id="time_display_{{ date }}">
-                                {{ details.start_time }} ～ {{ details.end_time }}
+                            <div class="schedule-item">
+                                <label>時間:</label>
+                                <div id="time_display_{{ details.id }}">
+                                    {{ details.start_time }} ～ {{ details.end_time }}
+                                </div>
+                                <div id="time_edit_{{ details.id }}" style="display: none;">
+                                    <input type="time" id="start_time_{{ details.id }}" name="start_time_{{ details.id }}" value="{{ details.start_time }}" disabled>
+                                    <span>～</span>
+                                    <input type="time" id="end_time_{{ details.id }}" name="end_time_{{ details.id }}" value="{{ details.end_time }}" disabled>
+                                </div>
                             </div>
-                            <div id="time_edit_{{ date }}" style="display: none;">
-                                <input type="time" id="start_time_{{ date }}" name="start_time_{{ date }}" value="{{ details.start_time }}" disabled>
-                                <span>～</span>
-                                <input type="time" id="end_time_{{ date }}" name="end_time_{{ date }}" value="{{ details.end_time }}" disabled>
+                            <!-- 場所のセレクトボックスとカスタム入力欄 -->
+                            <div class="schedule-item">
+                                <label for="location_{{ details.id }}">場所:</label>
+                                <select id="location_{{ details.id }}" name="location_{{ details.id }}" onchange="toggleCustomLocationInput('{{ details.id }}')" disabled data-original-value="{% if details.location in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}{{ details.location }}{% else %}その他{% endif %}">
+                                    <option value="広島市立大学" {% if details.location == "広島市立大学" %}selected{% endif %}>広島市立大学</option>
+                                    <option value="安佐南区スポーツセンター" {% if details.location == "安佐南区スポーツセンター" %}selected{% endif %}>安佐南区スポーツセンター</option>
+                                    <option value="県立総合体育館" {% if details.location == "県立総合体育館" %}selected{% endif %}>県立総合体育館</option>
+                                    <option value="その他" {% if details.location not in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}selected{% endif %}>その他</option>
+                                </select>
+                                <input type="text" id="custom_location_{{ details.id }}" name="custom_location_{{ details.id }}" value="{% if details.location not in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}{{ details.location }}{% else %}{% endif %}" {% if details.location in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}style="display:none;"{% endif %} placeholder="場所を入力" disabled data-original-value="{% if details.location not in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}{{ details.location }}{% else %}{% endif %}">
                             </div>
+                            {% if details.last_updated %}
+                            <div class="last-updated">
+                                最後に更新された日時: {{ details.last_updated }}
+                            </div>
+                            {% endif %}
                         </div>
-                        <!-- 場所のセレクトボックスとカスタム入力欄 -->
-                        <div class="schedule-item">
-                            <label for="location_{{ date }}">場所:</label>
-                            <select id="location_{{ date }}" name="location_{{ date }}" onchange="toggleCustomLocationInput('{{ date }}')" disabled data-original-value="{% if details.location in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}{{ details.location }}{% else %}その他{% endif %}">
-                                <option value="広島市立大学" {% if details.location == "広島市立大学" %}selected{% endif %}>広島市立大学</option>
-                                <option value="安佐南区スポーツセンター" {% if details.location == "安佐南区スポーツセンター" %}selected{% endif %}>安佐南区スポーツセンター</option>
-                                <option value="県立総合体育館" {% if details.location == "県立総合体育館" %}selected{% endif %}>県立総合体育館</option>
-                                <option value="その他" {% if details.location not in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}selected{% endif %}>その他</option>
-                            </select>
-                            <input type="text" id="custom_location_{{ date }}" name="custom_location_{{ date }}" value="{% if details.location not in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}{{ details.location }}{% else %}{% endif %}" {% if details.location in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}style="display:none;"{% endif %} placeholder="場所を入力" disabled data-original-value="{% if details.location not in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}{{ details.location }}{% else %}{% endif %}">
-                        </div>
-                        {% if details.last_updated %}
-                        <div class="last-updated">
-                            最後に更新された日時: {{ details.last_updated }}
-                        </div>
-                        {% endif %}
                     </div>
+                    {% endfor %}
                 </li>
                 {% endfor %}
             </ul>
@@ -400,12 +388,12 @@
             <div class="schedule-item">
                 <label for="start_time">開始時間:</label>
                 <input type="time" id="start_time" name="start_time" required>
-                <span>から</span> <!-- 「から」を追加 -->
+                <span>から</span>
             </div>
             <div class="schedule-item">
                 <label for="end_time">終了時間:</label>
                 <input type="time" id="end_time" name="end_time" required>
-                <span>まで</span> <!-- 「まで」を追加 -->
+                <span>まで</span>
             </div>
             <div class="form-group">
                 <label for="location">場所:</label>
