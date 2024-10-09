@@ -288,11 +288,16 @@
         <form action="{{ url_for('manage') }}" method="post">
             <ul class="schedule-list">
                 {% for date, schedule_list in schedule.items() %}
-                <li>
-                    <strong>{{ date }} ({{ date | next_weekday }})</strong>
+                <li class="date-group">
+                    <div class="date-header">
+                        <strong>{{ date }} ({{ date | next_weekday }})</strong>
+                    </div>
                     {% for details in schedule_list %}
-                    <div class="schedule-item">
-                        <input type="checkbox" name="schedule_ids" value="{{ details.id }}">
+                    <div class="schedule-item-group">
+                        <!-- チェックボックスを左端の中央に配置 -->
+                        <div class="checkbox-container">
+                            <input type="checkbox" name="schedule_ids" value="{{ details.id }}">
+                        </div>
                         <div class="schedule-detail">
                             <div class="schedule-item">
                                 <label for="plan_type_{{ details.id }}">予定:</label>
