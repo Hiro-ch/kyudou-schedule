@@ -293,6 +293,7 @@ input[readonly], input:disabled, select:disabled {
     display: flex; /* ボタンを隣り合わせに配置 */
     flex-direction: column; /* ボタンを縦に並べる */
     gap: 10px; /* ボタン間のスペースを追加 */
+    z-index: 9999; /* 非常に高い値を設定して最前面に表示 */
 }
 
 /* 上へボタンのスタイル */
