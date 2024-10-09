@@ -50,6 +50,8 @@
 
                 planTypeElement.value = planTypeElement.getAttribute('data-original-value');
                 customPlanTypeElement.value = customPlanTypeElement.getAttribute('data-original-value');
+
+                // カスタム入力欄の表示・非表示を更新
                 toggleCustomPlanTypeInput(schedule_id);
 
                 customPlanTypeElement.disabled = true;
@@ -60,6 +62,7 @@
                 locationElement.value = locationElement.getAttribute('data-original-value');
                 customLocationElement.value = customLocationElement.getAttribute('data-original-value');
 
+                // カスタム入力欄の表示・非表示を更新
                 toggleCustomLocationInput(schedule_id);
 
                 locationElement.disabled = true;
@@ -76,6 +79,7 @@
                 document.getElementById('time_edit_' + schedule_id).style.display = 'none';
             });
         }
+
 
         function confirmAction(actionType) {
             if (actionType === 'delete') {
@@ -301,14 +305,21 @@
                         <div class="schedule-detail">
                             <div class="schedule-item">
                                 <label for="plan_type_{{ details.id }}">予定:</label>
-                                <select id="plan_type_{{ details.id }}" name="plan_type_{{ details.id }}" onchange="toggleCustomPlanTypeInput('{{ details.id }}')" disabled data-original-value="{{ details.plan_type }}">
+                                <select id="plan_type_{{ details.id }}" name="plan_type_{{ details.id }}"
+                                    onchange="toggleCustomPlanTypeInput('{{ details.id }}')" disabled
+                                    data-original-value="{% if details.plan_type in ['全体練習', '個人練習', 'クラブ調整会議'] %}{{ details.plan_type }}{% else %}その他{% endif %}">
                                     <option value="全体練習" {% if details.plan_type == "全体練習" %}selected{% endif %}>全体練習</option>
                                     <option value="個人練習" {% if details.plan_type == "個人練習" %}selected{% endif %}>個人練習</option>
                                     <option value="クラブ調整会議" {% if details.plan_type == "クラブ調整会議" %}selected{% endif %}>クラブ調整会議</option>
                                     <option value="その他" {% if details.plan_type not in ["全体練習", "個人練習", "クラブ調整会議"] %}selected{% endif %}>その他</option>
                                 </select>
-                                <input type="text" id="custom_plan_type_{{ details.id }}" name="custom_plan_type_{{ details.id }}" value="{{ details.plan_type if details.plan_type not in ['全体練習', '個人練習', 'クラブ調整会議'] else '' }}" {% if details.plan_type in ["全体練習", "個人練習", "クラブ調整会議"] %}style="display:none;"{% endif %} disabled data-original-value="{{ details.plan_type if details.plan_type not in ['全体練習', '個人練習', 'クラブ調整会議'] else '' }}" placeholder="予定を入力">
-                            </div>
+                                <input type="text" id="custom_plan_type_{{ details.id }}" name="custom_plan_type_{{ details.id }}"
+                                    value="{% if details.plan_type not in ['全体練習', '個人練習', 'クラブ調整会議'] %}{{ details.plan_type }}{% else %}{% endif %}"
+                                    {% if details.plan_type in ['全体練習', '個人練習', 'クラブ調整会議'] %}style="display:none;"{% endif %}
+                                    disabled
+                                    data-original-value="{% if details.plan_type not in ['全体練習', '個人練習', 'クラブ調整会議'] %}{{ details.plan_type }}{% else %}{% endif %}"
+                                    placeholder="予定を入力">
+                            </div>                            
                             <div class="schedule-item">
                                 <label>参加者:</label>
                                 <div id="participants_display_{{ details.id }}">
@@ -337,14 +348,21 @@
                             <!-- 場所のセレクトボックスとカスタム入力欄 -->
                             <div class="schedule-item">
                                 <label for="location_{{ details.id }}">場所:</label>
-                                <select id="location_{{ details.id }}" name="location_{{ details.id }}" onchange="toggleCustomLocationInput('{{ details.id }}')" disabled data-original-value="{% if details.location in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}{{ details.location }}{% else %}その他{% endif %}">
+                                <select id="location_{{ details.id }}" name="location_{{ details.id }}"
+                                    onchange="toggleCustomLocationInput('{{ details.id }}')" disabled
+                                    data-original-value="{% if details.location in ['広島市立大学', '安佐南区スポーツセンター', '県立総合体育館'] %}{{ details.location }}{% else %}その他{% endif %}">
                                     <option value="広島市立大学" {% if details.location == "広島市立大学" %}selected{% endif %}>広島市立大学</option>
                                     <option value="安佐南区スポーツセンター" {% if details.location == "安佐南区スポーツセンター" %}selected{% endif %}>安佐南区スポーツセンター</option>
                                     <option value="県立総合体育館" {% if details.location == "県立総合体育館" %}selected{% endif %}>県立総合体育館</option>
                                     <option value="その他" {% if details.location not in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}selected{% endif %}>その他</option>
                                 </select>
-                                <input type="text" id="custom_location_{{ details.id }}" name="custom_location_{{ details.id }}" value="{% if details.location not in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}{{ details.location }}{% else %}{% endif %}" {% if details.location in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}style="display:none;"{% endif %} placeholder="場所を入力" disabled data-original-value="{% if details.location not in ["広島市立大学", "安佐南区スポーツセンター", "県立総合体育館"] %}{{ details.location }}{% else %}{% endif %}">
-                            </div>
+                                <input type="text" id="custom_location_{{ details.id }}" name="custom_location_{{ details.id }}"
+                                    value="{% if details.location not in ['広島市立大学', '安佐南区スポーツセンター', '県立総合体育館'] %}{{ details.location }}{% else %}{% endif %}"
+                                    {% if details.location in ['広島市立大学', '安佐南区スポーツセンター', '県立総合体育館'] %}style="display:none;"{% endif %}
+                                    disabled
+                                    data-original-value="{% if details.location not in ['広島市立大学', '安佐南区スポーツセンター', '県立総合体育館'] %}{{ details.location }}{% else %}{% endif %}"
+                                    placeholder="場所を入力">
+                            </div>                            
                             {% if details.last_updated %}
                             <div class="last-updated">
                                 最後に更新された日時: {{ details.last_updated }}
