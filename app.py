@@ -111,6 +111,34 @@ def save_schedule(schedule_dict):
 # スケジュールを読み込み
 schedule_dict = load_schedule()
 
+# APIエンドポイント: スケジュールを取得する
+@app.route('/api/schedule', methods=['GET'])
+def get_schedule():
+    schedule = load_schedule()
+    return jsonify(schedule)
+
+# APIエンドポイント: スケジュールを更新する
+@app.route('/api/update_schedule', methods=['POST'])
+def update_schedule():
+    global schedule_dict
+    new_schedule = request.json  # 受け取ったJSONデータを取得
+    if new_schedule:
+        # 日付をdatetimeオブジェクトに変換して昇順にソート
+        sorted_schedule = dict(sorted(new_schedule.items(), key=lambda item: datetime.datetime.strptime(item[0], '%m/%d')))
+        
+        # 既存の日付に対する更新または新しい日付の追加
+        for date, plans in sorted_schedule.items():
+            if date in schedule_dict:
+                schedule_dict[date].extend(plans)  # 既存のリストに追加
+            else:
+                schedule_dict[date] = plans  # 新しい日付を追加
+
+        save_schedule(schedule_dict)  # 新しいスケジュールを保存
+        print("スケジュールが更新されました。")
+        return jsonify({"message": "スケジュールが更新されました。"}), 200
+    else:
+        return jsonify({"message": "スケジュールの更新に失敗しました。"}), 400
+
 # 一般ユーザー用ログインページのルート
 @app.route('/user_login', methods=['POST'])
 def user_login():
