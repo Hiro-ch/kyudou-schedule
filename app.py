@@ -126,12 +126,8 @@ def update_schedule():
         # 日付をdatetimeオブジェクトに変換して昇順にソート
         sorted_schedule = dict(sorted(new_schedule.items(), key=lambda item: datetime.datetime.strptime(item[0], '%m/%d')))
         
-        # 既存の日付に対する更新または新しい日付の追加
-        for date, plans in sorted_schedule.items():
-            if date in schedule_dict:
-                schedule_dict[date].extend(plans)  # 既存のリストに追加
-            else:
-                schedule_dict[date] = plans  # 新しい日付を追加
+        # 既存のスケジュールを新しいスケジュールで上書き
+        schedule_dict = sorted_schedule
 
         save_schedule(schedule_dict)  # 新しいスケジュールを保存
         print("スケジュールが更新されました。")
