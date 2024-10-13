@@ -407,28 +407,25 @@ def handle_message(event):
 
 # フィルターを使用してスケジュールを取得する
 def filter_schedule_by_name(name):
-    with app.test_client() as client:
-        # フォームデータとして名前を渡してフィルターを呼び出す
-        response = client.post('/filter', data={'participants_filter': name, 'search_mode': 'OR'})
-        # フィルタリング結果をHTMLから取得
-        if response.status_code == 200:
-            # フィルタリングされたスケジュールデータを解析
-            # 必要に応じてレンダリングされたHTMLから抽出
-            return parse_filtered_schedule(response.data)
-        return None
-
-def parse_filtered_schedule(data):
-    # レスポンスデータを解析してスケジュールを抽出する関数
-    # HTMLを解析してスケジュール情報を取り出す処理を実装
-    # 仮にJSONとして返すならそのまま使えるが、HTMLの場合はパースが必要
-    pass
+    filtered_schedule = {}
+    name = name.strip()
+    for date, events in schedule_dict.items():
+        filtered_events = []
+        for event in events:
+            participants = event.get('participants', [])
+            if name in participants or '全員' in participants:
+                filtered_events.append(event)
+        if filtered_events:
+            filtered_schedule[date] = filtered_events
+    return filtered_schedule
 
 def format_schedule(schedule):
     # スケジュールを整形して返す関数
     result = []
     for date, events in schedule.items():
         for event in events:
-            result.append(f"{date} - {event['plan_type']} ({event['start_time']}〜{event['end_time']}) @ {event['location']}")
+            participants = ', '.join(event.get('participants', []))
+            result.append(f"{date} ({next_weekday(date)})\n予定: {event['plan_type']}\n時間: {event['start_time']}〜{event['end_time']}\n場所: {event['location']}\n参加者: {participants}\n")
     return "\n".join(result)
 
 if __name__ == '__main__':
