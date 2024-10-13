@@ -408,9 +408,31 @@ def handle_message(event):
     elif input_text_lower.startswith('bot '):
         search_mode = 'OR'  # デフォルトで OR
         names_text = input_text[4:].strip()
-    else:
-        # 'bot ' で始まらないメッセージには反応しない
-        return  # 何もしない
+    elif input_text_lower.startswith('bot help'):
+        # 'bot ' で始まらないメッセージには使い方を説明する
+        usage_message = (
+            "こんにちは！スケジュール確認ボットの使い方をご案内します。\n\n"
+            "【使い方】\n"
+            "- **個人の予定を確認する**：\n"
+            "  `bot 名前`\n"
+            "  例： `bot 田中`\n\n"
+            "- **複数名の予定を OR 検索する**（いずれかの予定）：\n"
+            "  `bot 名前1 名前2`\n"
+            "  例： `bot 田中 鈴木`\n\n"
+            "- **複数名の予定を AND 検索する**（全員が参加する予定）：\n"
+            "  `bot and 名前1 名前2`\n"
+            "  例： `bot and 田中 鈴木`\n\n"
+            "- **検索モードを明示的に OR 指定する**：\n"
+            "  `bot or 名前1 名前2`\n"
+            "  例： `bot or 田中 鈴木`\n\n"
+            "※ 名前はスペースで区切って入力してください。\n"
+            "※ 大文字・小文字は区別されません。\n"
+        )
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=usage_message)
+        )
+        return
 
     if not names_text:
         response_message = "名前を入力してください。例: bot 田中"
