@@ -9,6 +9,9 @@ import requests
 import locale
 import platform
 import uuid  # ユニークIDを生成するために追加
+from linebot import LineBotApi, WebhookHandler
+from linebot.exceptions import InvalidSignatureError
+from linebot.models import MessageEvent, TextMessage, TextSendMessage
 
 # .envファイルから環境変数をロード
 load_dotenv()
@@ -32,6 +35,12 @@ USER_PASSWORD = os.getenv('USER_PASSWORD')
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
 PARTICIPANTS_NAMES = os.getenv('PARTICIPANTS_NAMES', '').split(',')
+# .envファイルからLINEのチャネルシークレットとアクセストークンを取得
+LINE_CHANNEL_SECRET = os.getenv('LINE_CHANNEL_SECRET')
+LINE_CHANNEL_ACCESS_TOKEN = os.getenv('LINE_CHANNEL_ACCESS_TOKEN')
+
+line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
+handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -363,6 +372,64 @@ def filter():
                     filtered_schedule[date] = filtered_list
 
     return render_template('index.html', schedule=filtered_schedule, participants_names=PARTICIPANTS_NAMES, user=current_user)
+
+# LINE Webhookのエンドポイント
+@app.route("/callback", methods=['POST'])
+def callback():
+    signature = request.headers['X-Line-Signature']
+    body = request.get_data(as_text=True)
+
+    try:
+        handler.handle(body, signature)
+    except InvalidSignatureError:
+        abort(400)
+
+    return 'OK'
+
+# LINEからのメッセージに対する処理
+@handler.add(MessageEvent, message=TextMessage)
+def handle_message(event):
+    input_name = event.message.text.strip()
+
+    # スケジュールをフィルタリングして取得
+    filtered_schedule = filter_schedule_by_name(input_name)
+
+    if filtered_schedule:
+        response_message = format_schedule(filtered_schedule)
+    else:
+        response_message = f"{input_name}さんの予定が見つかりませんでした。"
+
+    # LINEにメッセージを返信
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=response_message)
+    )
+
+# フィルターを使用してスケジュールを取得する
+def filter_schedule_by_name(name):
+    with app.test_client() as client:
+        # フォームデータとして名前を渡してフィルターを呼び出す
+        response = client.post('/filter', data={'participants_filter': name, 'search_mode': 'OR'})
+        # フィルタリング結果をHTMLから取得
+        if response.status_code == 200:
+            # フィルタリングされたスケジュールデータを解析
+            # 必要に応じてレンダリングされたHTMLから抽出
+            return parse_filtered_schedule(response.data)
+        return None
+
+def parse_filtered_schedule(data):
+    # レスポンスデータを解析してスケジュールを抽出する関数
+    # HTMLを解析してスケジュール情報を取り出す処理を実装
+    # 仮にJSONとして返すならそのまま使えるが、HTMLの場合はパースが必要
+    pass
+
+def format_schedule(schedule):
+    # スケジュールを整形して返す関数
+    result = []
+    for date, events in schedule.items():
+        for event in events:
+            result.append(f"{date} - {event['plan_type']} ({event['start_time']}〜{event['end_time']}) @ {event['location']}")
+    return "\n".join(result)
 
 if __name__ == '__main__':
     app.run(debug=True)
