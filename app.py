@@ -12,9 +12,13 @@ import platform
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
+import logging
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your_default_secret_key')
+
+# ログの設定
+logging.basicConfig(level=logging.INFO)
 
 # Flask-Loginの設定
 login_manager = LoginManager()
@@ -34,44 +38,20 @@ LINE_CHANNEL_ACCESS_TOKEN = os.getenv('LINE_CHANNEL_ACCESS_TOKEN')
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
-# データベース設定（SQLiteを使用）
-import sqlite3
-
-DB_FILE = 'group_settings.db'
-
-def init_db():
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS group_settings (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            group_id TEXT UNIQUE NOT NULL
-        )
-    ''')
-    conn.commit()
-    conn.close()
+# group_id を保存するファイルのパス
+GROUP_ID_FILE = 'group_id.txt'
 
 def save_group_id(group_id):
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT OR REPLACE INTO group_settings (id, group_id)
-        VALUES (1, ?)
-    ''', (group_id,))
-    conn.commit()
-    conn.close()
-    print(f"グループIDを保存しました: {group_id}")
+    with open(GROUP_ID_FILE, 'w') as f:
+        f.write(group_id)
+    app.logger.info(f"グループIDを保存しました: {group_id}")
 
 def get_group_id():
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute('SELECT group_id FROM group_settings WHERE id = 1')
-    result = cursor.fetchone()
-    conn.close()
-    if result:
-        return result[0]
+    if os.path.exists(GROUP_ID_FILE):
+        with open(GROUP_ID_FILE, 'r') as f:
+            return f.read().strip()
     else:
-        print("グループIDが見つかりません。")
+        app.logger.warning("group_id.txt が存在しません。")
         return None
 
 # 日付をdatetimeオブジェクトに変換し、その日付の曜日を日本語で取得するフィルタ
@@ -156,7 +136,7 @@ def update_schedule():
         schedule_dict = sorted_schedule
 
         save_schedule(schedule_dict)  # 新しいスケジュールを保存
-        print("スケジュールが更新されました。")
+        app.logger.info("スケジュールが更新されました。")
         return jsonify({"message": "スケジュールが更新されました。"}), 200
     else:
         return jsonify({"message": "スケジュールの更新に失敗しました。"}), 400
@@ -393,14 +373,18 @@ def filter():
 # LINE Webhookのエンドポイント
 @app.route("/callback", methods=['POST'])
 def callback():
-    signature = request.headers['X-Line-Signature']
+    signature = request.headers.get('X-Line-Signature', '')
     body = request.get_data(as_text=True)
+
+    app.logger.info(f"Received webhook: {body}")
 
     try:
         handler.handle(body, signature)
-
+        
         # リクエストボディをパース
         events = json.loads(body).get('events', [])
+        app.logger.info(f"Parsed events: {events}")
+        
         for event in events:
             # グループに参加したときのイベント
             if event['type'] == 'join':
@@ -410,7 +394,9 @@ def callback():
                     save_group_id(group_id)
                     # 挨拶メッセージを送信
                     send_welcome_message(group_id)
+                    app.logger.info(f"Handled join event: group_id={group_id}")
     except InvalidSignatureError:
+        app.logger.error("Invalid signature. Check your channel access token/channel secret.")
         abort(400)
 
     return 'OK'
@@ -548,10 +534,18 @@ def send_line_group_message(group_id, message):
     }
     response = requests.post(line_api_url, headers=headers, json=data)
     if response.status_code == 200:
-        print("グループへのメッセージ送信に成功しました。")
+        app.logger.info("グループへのメッセージ送信に成功しました。")
     else:
-        print(f"メッセージの送信に失敗しました: {response.status_code}\n{response.text}")
+        app.logger.error(f"メッセージの送信に失敗しました: {response.status_code}\n{response.text}")
+
+# APIエンドポイント: group_id を取得する
+@app.route('/api/group_id', methods=['GET'])
+def api_get_group_id():
+    group_id = get_group_id()
+    if group_id:
+        return jsonify({"group_id": group_id}), 200
+    else:
+        return jsonify({"error": "group_idが設定されていません。"}), 404
 
 if __name__ == '__main__':
-    init_db()
     app.run(host='0.0.0.0', port=int(os.getenv('PORT', 5000)))
