@@ -1,53 +1,91 @@
 import os
 import json
-from flask import Flask, render_template, redirect, url_for, request, flash, session, jsonify, send_from_directory
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from dotenv import load_dotenv
+import uuid
 import datetime
+from flask import Flask, render_template, redirect, url_for, request, flash, jsonify, send_from_directory, abort
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from functools import wraps
+from dotenv import load_dotenv
 import pytz
 import requests
-import locale
 import platform
-import uuid  # ユニークIDを生成するために追加
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 
-# .envファイルから環境変数をロード
-load_dotenv()
-
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your_default_secret_key')
-
-@app.route('/static/<path:filename>')
-def custom_static(filename):
-    return send_from_directory('static', filename, cache_timeout=3600)
 
 # Flask-Loginの設定
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-app.config['SESSION_PERMANENT'] = False
-
 # 環境変数から情報を取得
+load_dotenv()
 USER_PASSWORD = os.getenv('USER_PASSWORD')
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
 PARTICIPANTS_NAMES = os.getenv('PARTICIPANTS_NAMES', '').split(',')
-# .envファイルからLINEのチャネルシークレットとアクセストークンを取得
+
+# LINEの設定
 LINE_CHANNEL_SECRET = os.getenv('LINE_CHANNEL_SECRET')
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv('LINE_CHANNEL_ACCESS_TOKEN')
-
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
-locale.setlocale(locale.LC_ALL, '')
+# API認証トークン
+API_TOKEN = os.getenv('API_TOKEN', 'your_default_api_token')
 
-# 日付をdatetimeオブジェクトに変換するフィルタを作成
-@app.template_filter('todate')
-def todate(date_str):
-    return datetime.datetime.strptime(date_str, '%m/%d')
+# データベース設定（SQLiteを使用）
+import sqlite3
+
+DB_FILE = 'group_settings.db'
+
+def init_db():
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS group_settings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            group_id TEXT UNIQUE NOT NULL
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def save_group_id(group_id):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT OR REPLACE INTO group_settings (id, group_id)
+        VALUES (1, ?)
+    ''', (group_id,))
+    conn.commit()
+    conn.close()
+    print(f"グループIDを保存しました: {group_id}")
+
+def get_group_id():
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute('SELECT group_id FROM group_settings WHERE id = 1')
+    result = cursor.fetchone()
+    conn.close()
+    if result:
+        return result[0]
+    else:
+        print("グループIDが見つかりません。")
+        return None
+
+# API認証デコレーター
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        if not token or token != f'Bearer {API_TOKEN}':
+            abort(401, description="Unauthorized")
+        return f(*args, **kwargs)
+    return decorated
 
 # 日付をdatetimeオブジェクトに変換し、その日付の曜日を日本語で取得するフィルタ
 @app.template_filter('next_weekday')
@@ -114,12 +152,14 @@ schedule_dict = load_schedule()
 
 # APIエンドポイント: スケジュールを取得する
 @app.route('/api/schedule', methods=['GET'])
+@token_required
 def get_schedule():
     schedule = load_schedule()
     return jsonify(schedule)
 
 # APIエンドポイント: スケジュールを更新する
 @app.route('/api/update_schedule', methods=['POST'])
+@token_required
 def update_schedule():
     global schedule_dict
     new_schedule = request.json  # 受け取ったJSONデータを取得
@@ -373,6 +413,18 @@ def callback():
 
     try:
         handler.handle(body, signature)
+
+        # リクエストボディをパース
+        events = json.loads(body).get('events', [])
+        for event in events:
+            # グループに参加したときのイベント
+            if event['type'] == 'join':
+                source = event['source']
+                if source['type'] == 'group':
+                    group_id = source['groupId']
+                    save_group_id(group_id)
+                    # 挨拶メッセージを送信
+                    send_welcome_message(group_id)
     except InvalidSignatureError:
         abort(400)
 
@@ -482,11 +534,39 @@ def format_schedule(schedule):
             participants = ', '.join(event.get('participants', []))
             # 曜日の取得
             weekday = next_weekday(date)
-            result.append(f"{date}（{weekday}）\n予定: {event['plan_type']}\n時間: {event['start_time']}〜{event['end_time']}\n場所: {event['location']}\n参加者: {participants}\n")
+            result.append(f"{date}（{weekday}）\n予定: {event['plan_type']}\n時間: {event['start_time']}～{event['end_time']}\n場所: {event['location']}\n参加者: {participants}\n")
     # 結果を結合して、最後にURLを追加
     schedule_text = "\n".join(result)
     schedule_text += "\n詳細はこちらからご確認ください：\nhttps://kyudou-schedule.onrender.com/login"
     return schedule_text
 
+# 挨拶メッセージを送信する関数
+def send_welcome_message(group_id):
+    message = "グループに参加しました！毎日20時に通知を送信します。"
+    send_line_group_message(group_id, message)
+
+# グループへのメッセージ送信関数
+def send_line_group_message(group_id, message):
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {LINE_CHANNEL_ACCESS_TOKEN}',
+    }
+    line_api_url = 'https://api.line.me/v2/bot/message/push'
+    data = {
+        'to': group_id,
+        'messages': [
+            {
+                'type': 'text',
+                'text': message,
+            }
+        ]
+    }
+    response = requests.post(line_api_url, headers=headers, json=data)
+    if response.status_code == 200:
+        print("グループへのメッセージ送信に成功しました。")
+    else:
+        print(f"メッセージの送信に失敗しました: {response.status_code}\n{response.text}")
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    init_db()
+    app.run(host='0.0.0.0', port=int(os.getenv('PORT', 5000)))
