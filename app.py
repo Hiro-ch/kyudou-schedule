@@ -396,20 +396,8 @@ def handle_message(event):
     search_mode = 'OR'  # デフォルトは OR
     names_text = ''
     
-    # メッセージが 'bot and ' で始まるかチェック
-    if input_text_lower.startswith('bot and '):
-        search_mode = 'AND'
-        names_text = input_text[8:].strip()
-    # メッセージが 'bot or ' で始まるかチェック
-    elif input_text_lower.startswith('bot or '):
-        search_mode = 'OR'
-        names_text = input_text[7:].strip()
-    # メッセージが 'bot ' で始まる場合
-    elif input_text_lower.startswith('bot '):
-        search_mode = 'OR'  # デフォルトで OR
-        names_text = input_text[4:].strip()
-    elif input_text_lower.startswith('bot help'):
-        # 'bot ' で始まらないメッセージには使い方を説明する
+    # 'bot help' が入力された場合
+    if input_text_lower == 'bot help':
         usage_message = (
             "こんにちは！スケジュール確認ボットの使い方をご案内します。\n\n"
             "【使い方】\n"
@@ -425,6 +413,8 @@ def handle_message(event):
             "- **検索モードを明示的に OR 指定する**：\n"
             "  `bot or 名前1 名前2`\n"
             "  例： `bot or 田中 鈴木`\n\n"
+            "- **ヘルプを表示する**：\n"
+            "  `bot help`\n\n"
             "※ 名前はスペースで区切って入力してください。\n"
             "※ 大文字・小文字は区別されません。\n"
         )
@@ -433,6 +423,22 @@ def handle_message(event):
             TextSendMessage(text=usage_message)
         )
         return
+    
+    # メッセージが 'bot and ' で始まるかチェック
+    elif input_text_lower.startswith('bot and '):
+        search_mode = 'AND'
+        names_text = input_text[8:].strip()
+    # メッセージが 'bot or ' で始まるかチェック
+    elif input_text_lower.startswith('bot or '):
+        search_mode = 'OR'
+        names_text = input_text[7:].strip()
+    # メッセージが 'bot ' で始まる場合
+    elif input_text_lower.startswith('bot '):
+        search_mode = 'OR'  # デフォルトで OR
+        names_text = input_text[4:].strip()
+    else:
+        # 'bot' で始まらないメッセージには反応しない
+        return  # 何もしない
 
     if not names_text:
         response_message = "名前を入力してください。例: bot 田中"
