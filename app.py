@@ -2,7 +2,7 @@ import os
 import json
 import uuid
 import datetime
-from flask import Flask, render_template, redirect, url_for, request, flash, jsonify, send_from_directory, abort
+from flask import Flask, render_template, redirect, url_for, request, flash, jsonify, abort
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from functools import wraps
 from dotenv import load_dotenv
@@ -33,9 +33,6 @@ LINE_CHANNEL_SECRET = os.getenv('LINE_CHANNEL_SECRET')
 LINE_CHANNEL_ACCESS_TOKEN = os.getenv('LINE_CHANNEL_ACCESS_TOKEN')
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
-
-# API認証トークン
-API_TOKEN = os.getenv('API_TOKEN', 'your_default_api_token')
 
 # データベース設定（SQLiteを使用）
 import sqlite3
@@ -76,16 +73,6 @@ def get_group_id():
     else:
         print("グループIDが見つかりません。")
         return None
-
-# API認証デコレーター
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = request.headers.get('Authorization')
-        if not token or token != f'Bearer {API_TOKEN}':
-            abort(401, description="Unauthorized")
-        return f(*args, **kwargs)
-    return decorated
 
 # 日付をdatetimeオブジェクトに変換し、その日付の曜日を日本語で取得するフィルタ
 @app.template_filter('next_weekday')
@@ -150,16 +137,14 @@ def save_schedule(schedule_dict):
 # スケジュールを読み込み
 schedule_dict = load_schedule()
 
-# APIエンドポイント: スケジュールを取得する
+# APIエンドポイント: スケジュールを取得する（認証なし）
 @app.route('/api/schedule', methods=['GET'])
-@token_required
 def get_schedule():
     schedule = load_schedule()
     return jsonify(schedule)
 
-# APIエンドポイント: スケジュールを更新する
+# APIエンドポイント: スケジュールを更新する（認証なし）
 @app.route('/api/update_schedule', methods=['POST'])
-@token_required
 def update_schedule():
     global schedule_dict
     new_schedule = request.json  # 受け取ったJSONデータを取得
