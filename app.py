@@ -390,44 +390,65 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     input_text = event.message.text.strip()
+    input_text_lower = input_text.lower()
     
-    # メッセージが 'bot ' で始まるかチェック（大文字・小文字を無視）
-    if input_text.lower().startswith('bot '):
-        # 'bot ' の後の部分を名前として取得し、スペースで分割
+    # 検索モードと名前の初期化
+    search_mode = 'OR'  # デフォルトは OR
+    names_text = ''
+    
+    # メッセージが 'bot and ' で始まるかチェック
+    if input_text_lower.startswith('bot and '):
+        search_mode = 'AND'
+        names_text = input_text[8:].strip()
+    # メッセージが 'bot or ' で始まるかチェック
+    elif input_text_lower.startswith('bot or '):
+        search_mode = 'OR'
+        names_text = input_text[7:].strip()
+    # メッセージが 'bot ' で始まる場合
+    elif input_text_lower.startswith('bot '):
+        search_mode = 'OR'  # デフォルトで OR
         names_text = input_text[4:].strip()
-        if not names_text:
-            response_message = "名前を入力してください。例: bot 田中"
-        else:
-            # 入力された名前をスペースで分割してリスト化
-            input_names = names_text.split()
-            
-            # スケジュールをフィルタリングして取得
-            filtered_schedule = filter_schedule_by_names(input_names)
-            
-            if filtered_schedule:
-                response_message = format_schedule(filtered_schedule)
-            else:
-                response_message = f"{'、'.join(input_names)}さんの予定が見つかりませんでした。\n詳細はこちらからご確認ください：\nhttps://kyudou-schedule.onrender.com/login"
-        
-        # LINEにメッセージを返信
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=response_message)
-        )
     else:
         # 'bot ' で始まらないメッセージには反応しない
-        pass  # 何もしない
+        return  # 何もしない
+
+    if not names_text:
+        response_message = "名前を入力してください。例: bot 田中"
+    else:
+        # 入力された名前をスペースで分割してリスト化
+        input_names = names_text.split()
+        
+        # スケジュールをフィルタリングして取得
+        filtered_schedule = filter_schedule_by_names(input_names, search_mode)
+        
+        if filtered_schedule:
+            response_message = format_schedule(filtered_schedule)
+        else:
+            response_message = f"{'、'.join(input_names)}さんの予定が見つかりませんでした。\n詳細はこちらからご確認ください：\nhttps://kyudou-schedule.onrender.com/login"
+
+    # LINEにメッセージを返信
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=response_message)
+    )
 
 # 複数の名前でフィルタリングする関数
-def filter_schedule_by_names(names):
+def filter_schedule_by_names(names, search_mode='OR'):
     filtered_schedule = {}
     names = [name.strip() for name in names]
     for date, events in schedule_dict.items():
         filtered_events = []
         for event in events:
             participants = event.get('participants', [])
-            if '全員' in participants or any(name in participants for name in names):
+            if '全員' in participants:
                 filtered_events.append(event)
+                continue
+            if search_mode == 'OR':
+                if any(name in participants for name in names):
+                    filtered_events.append(event)
+            elif search_mode == 'AND':
+                if all(name in participants for name in names):
+                    filtered_events.append(event)
         if filtered_events:
             filtered_schedule[date] = filtered_events
     return filtered_schedule
