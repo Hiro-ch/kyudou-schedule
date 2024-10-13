@@ -54,19 +54,11 @@ def todate(date_str):
 def next_weekday(date_str):
     # date_strを月と日に分割
     month, day = map(int, date_str.split('/'))
-    # 今日の日付を取得
-    today = datetime.date.today()
     # 現在の年を取得
-    current_year = today.year
+    current_year = datetime.date.today().year
     # 日付オブジェクトを作成
-    try:
-        date = datetime.date(current_year, month, day)
-    except ValueError:
-        # 例えば2月29日など、存在しない日付の場合は翌年に設定
-        date = datetime.date(current_year + 1, month, day)
-    # 日付が今日より前の場合は翌年に設定
-    if date < today:
-        date = date.replace(year=current_year + 1)
+    date = datetime.date(current_year, month, day)
+    
     # 曜日リスト（0:月曜日, 6:日曜日）
     weekdays_jp = ['月', '火', '水', '木', '金', '土', '日']
     return weekdays_jp[date.weekday()]
