@@ -92,6 +92,7 @@ def login():
 def load_schedule():
     with open('schedule.json', 'r', encoding='utf-8') as f:
         schedule = json.load(f)
+
     # 各日付の値がリストであることを保証
     for date, schedules in schedule.items():
         if not isinstance(schedules, list):
@@ -100,13 +101,20 @@ def load_schedule():
         for schedule_item in schedule[date]:
             if 'id' not in schedule_item:
                 schedule_item['id'] = str(uuid.uuid4())
-    # スケジュールを保存して、付与した'id'を保存
-    with open('schedule.json', 'w', encoding='utf-8') as f:
-        json.dump(schedule, f, ensure_ascii=False, indent=4)
+
+        # 時間順にソートする
+        schedule[date].sort(key=lambda x: datetime.datetime.strptime(x['start_time'], '%H:%M'))
+
     # 日付でソート
     def parse_date(date_str):
         return datetime.datetime.strptime(date_str, '%m/%d')
+    
     sorted_schedule = dict(sorted(schedule.items(), key=lambda item: parse_date(item[0])))
+
+    # ソートされたスケジュールを保存
+    with open('schedule.json', 'w', encoding='utf-8') as f:
+        json.dump(sorted_schedule, f, ensure_ascii=False, indent=4)
+
     return sorted_schedule
 
 # スケジュールをJSONファイルに保存する
@@ -211,7 +219,6 @@ def add():
     jst = pytz.timezone('Asia/Tokyo')
     now = datetime.datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
 
-    # ユニークなIDを付与
     new_schedule = {
         "id": str(uuid.uuid4()),
         "plan_type": plan_type,
@@ -227,10 +234,11 @@ def add():
 
     schedule_dict[date].append(new_schedule)
 
-    # 日付でソート
-    def parse_date(date_str):
-        return datetime.datetime.strptime(date_str, '%m/%d')
-    sorted_schedule = dict(sorted(schedule_dict.items(), key=lambda item: parse_date(item[0])))
+    # 時間順にソートする
+    schedule_dict[date].sort(key=lambda x: datetime.datetime.strptime(x['start_time'], '%H:%M'))
+
+    # 日付でのソート
+    sorted_schedule = dict(sorted(schedule_dict.items(), key=lambda item: datetime.datetime.strptime(item[0], '%m/%d')))
 
     schedule_dict.clear()
     schedule_dict.update(sorted_schedule)
