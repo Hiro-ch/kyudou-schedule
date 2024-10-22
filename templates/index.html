@@ -123,21 +123,22 @@
                 const location = document.getElementById('location').value;
                 const customLocation = document.getElementById('custom_location').value;
 
-                // 確認メッセージを作成
-                const confirmationMessage = `新しいスケジュールを追加しますか？\n\n日付: ${date}\n予定: ${customPlan || planType}\n参加者: ${participants}\n時間: ${startTime} ～ ${endTime}\n場所: ${customLocation || location}`;
+                // 日付から曜日を取得
+                const weekdayNames = ['日', '月', '火', '水', '木', '金', '土'];
+                const selectedDate = new Date(date);
+                const weekday = weekdayNames[selectedDate.getDay()];
 
-                // 確認ダイアログを表示し、キャンセルされた場合はcancelAddingを呼び出す
+                // 確認メッセージを作成
+                const confirmationMessage = `新しいスケジュールを追加しますか？\n\n日付: ${date}(${weekday})\n予定: ${customPlan || planType}\n参加者: ${participants}\n時間: ${startTime} ～ ${endTime}\n場所: ${customLocation || location}`;
+
                 if (!confirm(confirmationMessage)) {
-                    cancelAdding();  // キャンセルボタンが押されたらcancelAdding関数を呼び出す
+                    cancelAdding();
                     return false;
                 }
                 return true;
-
-            } else if (actionType === 'logout') {
-                return confirm("ログアウトしますか？");
             }
             return false;
-        }
+        }   
 
         function toggleCustomPlanTypeInput(schedule_id) {
             const selectElement = document.getElementById('plan_type_' + schedule_id);
