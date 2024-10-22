@@ -505,7 +505,7 @@ def format_schedule(schedule):
             participants = ', '.join(event.get('participants', []))
             # 曜日の取得
             weekday = next_weekday(date)
-            result.append(f"{date}（{weekday}）\n予定: {event['plan_type']}\n時間: {event['start_time']}～{event['end_time']}\n場所: {event['location']}\n参加者: {participants}\n")
+            result.append(f"{date}({weekday})\n予定: {event['plan_type']}\n時間: {event['start_time']}～{event['end_time']}\n場所: {event['location']}\n参加者: {participants}\n")
     # 結果を結合して、最後にURLを追加
     schedule_text = "\n".join(result)
     schedule_text += "\n詳細はこちらからご確認ください：\nhttps://kyudou-schedule.onrender.com/login"
